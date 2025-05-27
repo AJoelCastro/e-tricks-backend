@@ -1,0 +1,46 @@
+# Node modules (no se deben subir nunca)
+node_modules/
+
+# Variables de entorno
+.env
+
+# Salidas de build de TypeScript
+dist/
+build/
+
+# Archivos de logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Directorio de cobertura de tests
+coverage/
+
+# Configs del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Config de entorno local de Visual Studio Code
+.vscode/
+
+# Archivos temporales de sistema
+*.swp
+*.swo
+*.tmp
+
+# Archivos de producción o lock
+package-lock.json
+# yarn.lock  (si usas Yarn en vez de npm, descomenta esto)
+
+# Archivos de ESLint/Prettier cache (opcional)
+.eslintcache
+
+# Archivos de test snapshots (opcional)
+__snapshots__/
+
+# Archivos de PM2 o logs de producción (opcional)
+pids/
+*.pid
+*.seed
+*.pid.lock
