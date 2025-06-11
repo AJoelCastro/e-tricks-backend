@@ -5,6 +5,7 @@ export interface IProduct extends Document {
     description: string;
     price: number;
     size: string[];
+    colors: string[];
     stock: number;
     category: string;
     images: string[];
