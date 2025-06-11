@@ -9,10 +9,10 @@ import {
 import authenticateClerkToken from '../middleware/auth';
 const router = express.Router();
 
-router.get('/get', authenticateClerkToken, getProducts);
+router.get('/get', getProducts);
 router.get('/:id/get', getProductById);
-router.post('/create', createProduct);
-router.put('/:id/update', updateProduct);
-router.delete('/:id/delete', deleteProduct);
+router.post('/create', authenticateClerkToken, createProduct);
+router.put('/:id/update', authenticateClerkToken, updateProduct);
+router.delete('/:id/delete', authenticateClerkToken, deleteProduct);
 
 export default router;
