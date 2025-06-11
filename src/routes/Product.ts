@@ -6,7 +6,8 @@ import {
     updateProduct, 
     deleteProduct 
 } from '../controllers/Product';
-import authenticateClerkToken from '../middleware/auth';
+const authenticateClerkToken = require('../middleware/auth');
+
 const router = express.Router();
 
 router.get('/get', getProducts);

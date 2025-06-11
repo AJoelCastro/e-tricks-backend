@@ -1,6 +1,6 @@
 import express from "express";
 import { createListFavorite, getFavoritesUser } from "../controllers/Favorite";
-import authenticateClerkToken from '../middleware/auth';
+const authenticateClerkToken = require('../middleware/auth');
 
 const router = express.Router();
 
