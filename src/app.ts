@@ -31,7 +31,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Routes
-app.use('/products', productRoutes);
+app.use('/product', productRoutes);
 app.use('/favorite', favoriteRoutes)
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {

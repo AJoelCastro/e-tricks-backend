@@ -10,7 +10,6 @@ const favoriteSchema = new Schema<IFavorite>({
     products: {
         type: [String],
         ref: 'Product',
-        required: true
     },
     createdAt: {
         type: Date,

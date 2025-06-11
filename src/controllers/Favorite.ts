@@ -10,3 +10,13 @@ export const getFavoritesByIdUsuario = async (req: Request, res: Response): Prom
         res.status(500).json({ message: "Error al obtener favoritos del usuario", error })
     }
 }
+export const createListFavorite = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { idUsuario } = req.body;
+        const newFavorite = new Favorite({ idUsuario });
+        await newFavorite.save();
+        res.status(201).json(newFavorite);
+    } catch (error) {
+        res.status(500).json({ message: "Error al crear la lista de favoritos", error });
+    }
+}
