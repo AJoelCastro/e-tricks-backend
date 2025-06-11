@@ -44,3 +44,4 @@ pids/
 *.pid
 *.seed
 *.pid.lock
+e-shopTricksBackend.pem
