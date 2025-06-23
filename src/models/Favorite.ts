@@ -1,10 +1,10 @@
 import mongoose, { Schema } from "mongoose";
 import { IFavorite } from "../interfaces/Favorite";
 
-const favoriteSchema = new Schema<IFavorite>({
+const FavoriteSchema = new Schema<IFavorite>({
     user: {
         type: String,
-        ref: 'User',
+        // ref: 'User',
         required: true
     },
     products: {
@@ -20,4 +20,4 @@ const favoriteSchema = new Schema<IFavorite>({
         default: Date.now
     }
 })
-export default mongoose.model<IFavorite>('Favorite', favoriteSchema);
+export default mongoose.model<IFavorite>('Favorite', FavoriteSchema);
