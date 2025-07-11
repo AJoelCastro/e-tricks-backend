@@ -1,10 +1,6 @@
 import { Document } from 'mongoose';
+import { IResenia } from './Resenia';
 
-export interface IResenia {
-  cliente: string;
-  valoracion: number;
-  comentario: string;
-}
 export interface IProduct extends Document {
     name: string;
     description: string;
