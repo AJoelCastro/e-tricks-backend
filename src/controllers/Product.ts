@@ -32,9 +32,9 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
 export const createProduct = async (req: Request, res: Response): Promise<void> => {
     try {
         const data: IProductRequest = req.body;
-
+        console.log(data)
         // Validaciones mínimas (opcional, también puedes usar un middleware de validación)
-        if (!data.name || !data.price || !data.category || !data.size || !data.stock) {
+        if (!data.name || !data.description || !data.price || !data.size || !data.stock || !data.category || !data.images || !data.images || !data.marca) {
             res.status(400).json({ message: 'Faltan campos obligatorios' });
         }
 
