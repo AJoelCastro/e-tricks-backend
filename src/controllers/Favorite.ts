@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Favorite from "../models/Favorite";
+import Favorite from "../models/User";
 
 //Crear una lista de favoritos
 export const createListFavorite = async (req: Request, res: Response): Promise<void> => {
