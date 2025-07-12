@@ -12,19 +12,59 @@ export const createFavoriteCartList = async (data: IUserRequest) =>{
     }
 }
 
-export const getFavoriteCartList = async (req: Request, res: Response): Promise<void> =>{
+export const verifyUser = async (req: Request, res: Response): Promise<void> =>{
     try {
-        const data: IUserRequest = req.body
-        if(!data.idClerk){
+        const idClerk = req.params.idClerk
+        console.log("idClerk",idClerk)
+        if(!idClerk){
             res.status(400).json({message: 'El id del usuario es obligatorio'})
         }
-        const verify = await userRepository.verifyExistFavoritesList(data.idClerk);
+        const data: IUserRequest = {
+            idClerk: idClerk,
+            favorites: [],
+            cart: []
+        }
+        const verify = await userRepository.verifyExistUser(idClerk);
         if(verify===null){
             const dataCreate = await createFavoriteCartList(data);
             res.status(201).json(dataCreate)
             return;
         }
         res.status(200).json(verify);
+    } catch (error) {
+        throw error
+    }
+}
+
+export const getFavorites = async (req: Request, res: Response): Promise<void> =>{
+    try {
+        const idClerk = req.params.idClerk
+        if(idClerk){
+            res.status(400).json({message: 'El id del usuario es obligatorio'})
+        }
+        const verify = await userRepository.verifyExistUser(idClerk);
+        if(verify===null){
+            res.status(400).json({message: 'El usuario no existe'})
+            return;
+        }
+        res.status(200).json(verify.favorites);
+    } catch (error) {
+        throw error
+    }
+}
+
+export const getCartItems = async (req: Request, res: Response): Promise<void> =>{
+    try {
+        const idClerk = req.params.idClerk
+        if(idClerk){
+            res.status(400).json({message: 'El id del usuario es obligatorio'})
+        }
+        const verify = await userRepository.verifyExistUser(idClerk);
+        if(verify===null){
+            res.status(400).json({message: 'El usuario no existe'})
+            return;
+        }
+        res.status(200).json(verify.cart);
     } catch (error) {
         throw error
     }
