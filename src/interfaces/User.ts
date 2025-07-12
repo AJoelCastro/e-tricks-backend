@@ -2,7 +2,7 @@ import { Document, Types } from "mongoose";
 import { ICartItem } from "./CartItem";
 
 export interface IUserRequest{
-    idClerk?: string;
+    idClerk: string;
     favorites?: Types.ObjectId[];
     cart?: ICartItem[]
 }

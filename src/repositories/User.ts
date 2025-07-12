@@ -4,9 +4,16 @@ import { UserModel } from "../models/User";
 export class UserRepository {
     async verifyExistFavoritesList (clerckId:string){
         try{
-            return await UserModel.findOne({idClerk: clerckId})
+            return await UserModel.findOne({idClerk: clerckId});
         }catch(error){
-            throw error
+            throw error;
+        }
+    }
+    async createFavoriteList (data: IUserRequest){
+        try {
+            return await UserModel.create(data);
+        } catch (error) {
+            throw error;
         }
     }
 }

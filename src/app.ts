@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/database';
 import productRoutes from './routes/Product';
-import favoriteRoutes from './routes/Favorite';
+import userRoutes from './routes/User';
 dotenv.config();
 
 const app: Express = express();
@@ -32,7 +32,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 // Routes
 app.use('/product', productRoutes);
-app.use('/favorite', favoriteRoutes)
+app.use('/user', userRoutes)
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
     res.status(200).json({ status: 'OK', message: 'Server is running' });
