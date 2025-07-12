@@ -1,9 +1,9 @@
 import express from "express";
-import { getFavoriteList } from "../controllers/User";
+import { getFavoriteCartList } from "../controllers/User";
 const authenticateClerkToken = require('../middleware/auth');
 
 const router = express.Router();
 
-router.get('/getFL', getFavoriteList); 
+router.get('/getFCL', authenticateClerkToken, getFavoriteCartList); 
 
 export default router;

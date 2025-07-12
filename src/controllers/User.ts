@@ -4,15 +4,15 @@ import { IUserRequest } from "../interfaces/User";
 
 const userRepository = new UserRepository();
 
-export const createFavoriteList = async (data: IUserRequest) =>{
+export const createFavoriteCartList = async (data: IUserRequest) =>{
     try {
-        return await userRepository.createFavoriteList(data);
+        return await userRepository.createFavoriteCartList(data);
     } catch (error) {
         throw error;
     }
 }
 
-export const getFavoriteList = async (req: Request, res: Response): Promise<void> =>{
+export const getFavoriteCartList = async (req: Request, res: Response): Promise<void> =>{
     try {
         const data: IUserRequest = req.body
         if(!data.idClerk){
@@ -20,8 +20,7 @@ export const getFavoriteList = async (req: Request, res: Response): Promise<void
         }
         const verify = await userRepository.verifyExistFavoritesList(data.idClerk);
         if(verify===null){
-            const dataCreate = await createFavoriteList(data);
-            console.log("data create", dataCreate)
+            const dataCreate = await createFavoriteCartList(data);
             res.status(201).json(dataCreate)
             return;
         }

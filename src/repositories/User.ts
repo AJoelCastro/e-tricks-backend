@@ -9,7 +9,7 @@ export class UserRepository {
             throw error;
         }
     }
-    async createFavoriteList (data: IUserRequest){
+    async createFavoriteCartList (data: IUserRequest){
         try {
             return await UserModel.create(data);
         } catch (error) {
