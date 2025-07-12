@@ -1,7 +1,7 @@
-import { Document } from "mongoose";
+import { Types } from "mongoose";
 
-export interface ICartItem extends Document{
-    productId: string;
+export interface ICartItem {
+    productId: Types.ObjectId;
     quantity: number;
     size: string;
 }
