@@ -106,12 +106,12 @@ export const getCartItems = async (req: Request, res: Response): Promise<void> =
         if(!idClerk){
             res.status(400).json({message: 'El id del usuario es obligatorio'})
         }
-        const verify = await userRepository.verifyExistUser(idClerk);
-        if(verify===null){
-            res.status(400).json({message: 'El usuario no existe'})
+        const dataCart = await userRepository.getCartItems(idClerk)
+        if (!dataCart || dataCart.cart.length === 0) {
+            res.status(200).json([]);
             return;
         }
-        res.status(200).json(verify.cart);
+        res.status(200).json(dataCart.cart);
     } catch (error) {
         throw error
     }

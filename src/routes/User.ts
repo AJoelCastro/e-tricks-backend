@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/verifyUser/:idClerk', authenticateClerkToken, verifyUser)
 router.get('/getFavorites/:idClerk', authenticateClerkToken, getFavorites); 
 router.get('/getFavoriteIds/:idClerk', authenticateClerkToken, getFavoriteIds);
-router.get('/getCartItems', authenticateClerkToken, getCartItems)
+router.get('/getCartItems/:idClerk', authenticateClerkToken, getCartItems)
 router.post('/addFavorite/:idClerk', authenticateClerkToken, addFavorite)
 router.delete('/removeFavorite/:idClerk', authenticateClerkToken, removeFavorite)
 

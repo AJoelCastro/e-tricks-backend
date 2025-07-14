@@ -52,7 +52,7 @@ export class UserRepository {
     }
     async getCartItems (clerckId:string){
         try {
-            return await UserModel.findOne({idClerk: clerckId}, {cart: 1, _id: 0});
+            return await UserModel.findOne({idClerk: clerckId}).populate('cart').select('favorites -_id');
         } catch (error) {
             throw error;
         }
