@@ -120,8 +120,8 @@ export const getCartItems = async (req: Request, res: Response): Promise<void> =
 export const addCartItem = async (req: Request, res: Response): Promise<void> =>{
     try {
         const userId = req.params.userId
-        const {idProduct, quantity, size} = req.body
-        if(!userId || !idProduct || !quantity || !size){
+        const { idProduct, quantity, size } = req.body
+        if(!userId || !idProduct || !quantity || !size ){
             res.status(400).json({message: 'El id del usuario y el id del producto son obligatorios'})
             return;
         }

@@ -28,6 +28,10 @@ const UserSchema = new Schema<IUser>({
         type: String,
         required: true,
       },
+      processed: {
+        type: Boolean,
+        default: false        
+      }
     }
   ],
 }, {
