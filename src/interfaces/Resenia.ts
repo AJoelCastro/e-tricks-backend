@@ -1,7 +1,7 @@
 import { Document } from 'mongoose';
 
 export interface IResenia extends Document{
-  clienteId: string;
+  userId: string;
   valoracion: number;
   comentario: string;
 }

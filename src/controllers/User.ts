@@ -14,16 +14,16 @@ export const createFavoriteCartList = async (data: IUserRequest) =>{
 
 export const verifyUser = async (req: Request, res: Response): Promise<void> =>{
     try {
-        const idClerk = req.params.idClerk
-        if(!idClerk){
+        const userId = req.params.userId
+        if(!userId){
             res.status(400).json({message: 'El id del usuario es obligatorio'})
         }
         const data: IUserRequest = {
-            idClerk: idClerk,
+            userId: userId,
             favorites: [],
             cart: []
         }
-        const verify = await userRepository.verifyExistUser(idClerk);
+        const verify = await userRepository.verifyExistUser(userId);
         if(verify===null){
             const dataCreate = await createFavoriteCartList(data);
             res.status(201).json(dataCreate)
@@ -37,11 +37,11 @@ export const verifyUser = async (req: Request, res: Response): Promise<void> =>{
 
 export const getFavorites = async (req: Request, res: Response): Promise<void> =>{
     try {
-        const idClerk = req.params.idClerk
-        if(!idClerk){
+        const userId = req.params.userId
+        if(!userId){
             res.status(400).json({message: 'El id del usuario es obligatorio'})
         }
-        const dataFavorites = await userRepository.getFavorites(idClerk)
+        const dataFavorites = await userRepository.getFavorites(userId)
         if (!dataFavorites || dataFavorites.favorites.length === 0) {
             res.status(200).json([]);
             return;
@@ -54,11 +54,11 @@ export const getFavorites = async (req: Request, res: Response): Promise<void> =
 
 export const getFavoriteIds = async (req: Request, res: Response): Promise<void> =>{
     try {
-        const idClerk = req.params.idClerk
-        if(!idClerk){
+        const userId = req.params.userId
+        if(!userId){
             res.status(400).json({message: 'El id del usuario es obligatorio'})
         }
-        const dataFavorites = await userRepository.getFavoriteIds(idClerk)
+        const dataFavorites = await userRepository.getFavoriteIds(userId)
         res.status(200).json(dataFavorites);
     } catch (error) {
         throw error
@@ -67,13 +67,13 @@ export const getFavoriteIds = async (req: Request, res: Response): Promise<void>
 
 export const addFavorite = async (req: Request, res: Response): Promise<void> =>{
     try {
-        const idClerk = req.params.idClerk
+        const userId = req.params.userId
         const {idProduct} = req.body
-        if(!idClerk || !idProduct){
+        if(!userId || !idProduct){
             res.status(400).json({message: 'El id del usuario y el id del producto son obligatorios'})
             return;
         }
-        const dataAdd = await userRepository.addFavorite(idClerk, idProduct)
+        const dataAdd = await userRepository.addFavorite(userId, idProduct)
         res.status(201).json(dataAdd);
     } catch (error) {
         throw error
@@ -82,13 +82,13 @@ export const addFavorite = async (req: Request, res: Response): Promise<void> =>
 
 export const removeFavorite = async (req: Request, res: Response): Promise<void> =>{
     try {
-        const idClerk = req.params.idClerk
+        const userId = req.params.userId
         const {idProduct} = req.body
-        if(!idClerk || !idProduct){
+        if(!userId || !idProduct){
             res.status(400).json({message: 'El id del usuario y el id del producto son obligatorios'})
             return;
         }
-        const dataRemove = await userRepository.removeFavorite(idClerk, idProduct);
+        const dataRemove = await userRepository.removeFavorite(userId, idProduct);
         if (dataRemove.modifiedCount === 0) {
             res.status(404).json({ message: 'No se encontró el favorito para eliminar o ya fue eliminado' });
             return;
@@ -102,16 +102,31 @@ export const removeFavorite = async (req: Request, res: Response): Promise<void>
 
 export const getCartItems = async (req: Request, res: Response): Promise<void> =>{
     try {
-        const idClerk = req.params.idClerk
-        if(!idClerk){
+        const userId = req.params.userId
+        if(!userId){
             res.status(400).json({message: 'El id del usuario es obligatorio'})
         }
-        const dataCart = await userRepository.getCartItems(idClerk)
+        const dataCart = await userRepository.getCartItems(userId)
         if (!dataCart || dataCart.cart.length === 0) {
             res.status(200).json([]);
             return;
         }
         res.status(200).json(dataCart.cart);
+    } catch (error) {
+        throw error
+    }
+}
+
+export const addCartItem = async (req: Request, res: Response): Promise<void> =>{
+    try {
+        const userId = req.params.userId
+        const {idProduct, quantity, size} = req.body
+        if(!userId || !idProduct || !quantity || !size){
+            res.status(400).json({message: 'El id del usuario y el id del producto son obligatorios'})
+            return;
+        }
+        const dataAdd = await userRepository.addCartItem(userId, idProduct, quantity, size)
+        res.status(201).json(dataAdd);
     } catch (error) {
         throw error
     }

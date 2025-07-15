@@ -3,7 +3,7 @@ import { IProduct } from '../interfaces/Product';
 
 const reseniaSchema = new Schema(
   {
-    clienteId: { type: String, required: true },
+    userId: { type: String, required: true },
     valoracion: { type: Number, required: true },
     comentario: { type: String, required: true }
   },
