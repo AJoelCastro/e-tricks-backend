@@ -136,7 +136,6 @@ export const removeCartItem = async (req: Request, res: Response): Promise<void>
     try {
         const userId = req.params.userId
         const {idCartItem} = req.body
-        console.log(userId, idCartItem)
         if(!userId || !idCartItem){
             res.status(400).json({message: 'El id del usuario y el id del producto son obligatorios'})
             return;
