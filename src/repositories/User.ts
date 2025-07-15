@@ -1,6 +1,6 @@
 import { IUserRequest } from "../interfaces/User";
 import { UserModel } from "../models/User";
-
+import mongoose from 'mongoose';
 export class UserRepository {
     async verifyExistUser (userId:string){
         try{
@@ -64,9 +64,9 @@ export class UserRepository {
             throw error;
         }
     }
-    async removeCartItem (userId:string, productId:string){
+    async removeCartItem (userId:string, idCartItem:string){
         try {
-            return await UserModel.updateOne({userId: userId}, {$pull: {cart: productId}});
+            return await UserModel.updateOne({userId: userId}, { $pull: { cart: { _id: new mongoose.Types.ObjectId(idCartItem) } } });
         } catch (error) {
             throw error;
         }

@@ -131,3 +131,24 @@ export const addCartItem = async (req: Request, res: Response): Promise<void> =>
         throw error
     }
 }
+
+export const removeCartItem = async (req: Request, res: Response): Promise<void> =>{
+    try {
+        const userId = req.params.userId
+        const {idCartItem} = req.body
+        console.log(userId, idCartItem)
+        if(!userId || !idCartItem){
+            res.status(400).json({message: 'El id del usuario y el id del producto son obligatorios'})
+            return;
+        }
+        const dataRemove = await userRepository.removeCartItem(userId, idCartItem);
+        if (dataRemove.modifiedCount === 0) {
+            res.status(404).json({ message: 'No se encontró el item del carrito para eliminar o ya fue eliminado' });
+            return;
+        }
+
+        res.status(200).json({ message: 'Item del carrito eliminado correctamente', result: dataRemove });
+    } catch (error) {
+        throw error
+    }
+}

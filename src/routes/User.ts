@@ -1,5 +1,5 @@
 import express from "express";
-import { getFavorites, getCartItems, verifyUser, addFavorite, getFavoriteIds, removeFavorite, addCartItem } from "../controllers/User";
+import { getFavorites, getCartItems, verifyUser, addFavorite, getFavoriteIds, removeFavorite, addCartItem, removeCartItem } from "../controllers/User";
 const authenticateClerkToken = require('../middleware/auth');
 
 const router = express.Router();
@@ -10,6 +10,6 @@ router.post('/addFavorite/:userId', authenticateClerkToken, addFavorite)
 router.delete('/removeFavorite/:userId', authenticateClerkToken, removeFavorite)
 router.get('/getCartItems/:userId', authenticateClerkToken, getCartItems)
 router.post('/addCartItem/:userId', authenticateClerkToken, addCartItem)
-
+router.delete('/removeCartItem/:userId', authenticateClerkToken, removeCartItem)
 
 export default router;
