@@ -10,11 +10,4 @@ export interface IOrder extends Document{
     paymentId: string;
     paymentStatus: boolean;
     paymentMethod: string;
-    shippingAddress: {
-        street: string;
-        city: string;
-        state: string;
-        zipCode: string;
-        country: string;
-    };
 }
