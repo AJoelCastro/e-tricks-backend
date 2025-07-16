@@ -1,3 +1,4 @@
+import { IAddress } from "../interfaces/Address";
 import { IUserRequest } from "../interfaces/User";
 import { UserModel } from "../models/User";
 import mongoose from 'mongoose';
@@ -67,6 +68,48 @@ export class UserRepository {
     async removeCartItem (userId:string, idCartItem:string){
         try {
             return await UserModel.updateOne({userId: userId}, { $pull: { cart: { _id: new mongoose.Types.ObjectId(idCartItem) } } });
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async getAddresses(userId: string) {
+        try {
+            const user = await UserModel.findOne({ userId }).select('addresses -_id');
+            return user?.addresses ?? [];
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async addAddress(userId: string, address: IAddress) {
+        try {
+            return await UserModel.updateOne(
+            { userId },
+            { $push: { addresses: address } }
+            );
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async updateAddress(userId: string, addressId: string, address: Partial<IAddress>) {
+        try {
+            return await UserModel.updateOne(
+            { userId, 'addresses._id': addressId },
+            { $set: { 'addresses.$': { ...address, _id: addressId } } }
+            );
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async deleteAddress(userId: string, addressId: string) {
+        try {
+            return await UserModel.updateOne(
+            { userId },
+            { $pull: { addresses: { _id: addressId } } }
+            );
         } catch (error) {
             throw error;
         }

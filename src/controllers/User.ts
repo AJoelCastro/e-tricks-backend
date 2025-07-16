@@ -151,3 +151,64 @@ export const removeCartItem = async (req: Request, res: Response): Promise<void>
         throw error
     }
 }
+
+export const getAddresses = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.userId;
+    if (!userId) {
+        res.status(400).json({ message: 'ID requerido' });
+        return;
+    }
+    const data = await userRepository.getAddresses(userId);
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(500).json({ message: 'Error interno', error });
+  }
+};
+
+export const addAddress = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.userId;
+    const { address } = req.body;
+    if (!userId || !address) {
+        res.status(400).json({ message: 'Datos faltantes' });
+        return;
+    }
+
+    const result = await userRepository.addAddress(userId, address);
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error interno', error });
+  }
+};
+
+export const updateAddress = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.userId;
+    const addressId = req.params.addressId;
+    const update = req.body;
+    if (!userId || !addressId) {
+        res.status(400).json({ message: 'Datos faltantes' });
+        return;
+    }
+    const result = await userRepository.updateAddress(userId, addressId, update);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error interno', error });
+  }
+};
+
+export const deleteAddress = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.userId;
+    const addressId = req.params.addressId;
+    if (!userId || !addressId) {
+        res.status(400).json({ message: 'Datos faltantes' });
+        return;
+    }
+    const result = await userRepository.deleteAddress(userId, addressId);
+    res.status(200).json({ message: 'Dirección eliminada correctamente', result });
+  } catch (error) {
+    res.status(500).json({ message: 'Error interno', error });
+  }
+};
