@@ -11,7 +11,7 @@ const AddressSchema = new Schema(
     zipCode: { type: String, required: true },
     country: { type: String, required: true },
     phone: { type: String, required: true },
-    isDefault: { type: Boolean, default: false },
+    // isDefault: { type: Boolean, default: false },
   },
   { _id: true } // 👈 esto es implícito, pero puedes dejarlo explícito si quieres
 );
