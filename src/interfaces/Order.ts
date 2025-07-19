@@ -1,13 +1,22 @@
-import { Document } from "mongoose";
-import { ICartItem } from "./CartItem";
+import { Document, Types } from "mongoose";
 
-export interface IOrder extends Document{
+export interface IOrderItem {
+    productId: Types.ObjectId;
+    name: string;
+    price: number;
+    quantity: number;
+    size: string;
+}
+
+export interface IOrder extends Document {
     userId: string;
-    items: ICartItem[];
+    items: IOrderItem[];
     totalAmount: number;
-    orderDate: Date;
+    addressId: string;
     status: string;
     paymentId: string;
     paymentStatus: boolean;
     paymentMethod: string;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
