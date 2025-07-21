@@ -33,9 +33,23 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     try {
         const data: IProductRequest = req.body;
         console.log(data)
-        // Validaciones mínimas (opcional, también puedes usar un middleware de validación)
-        if (!data.name || !data.description || !data.price || !data.size || !data.stock || !data.category || !data.images || !data.images || !data.marca) {
+        if (
+            !data.name || 
+            !data.description || 
+            !data.price || 
+            !data.stockPorTalla || 
+            !data.material ||
+            !data.category || 
+            !data.images || 
+            !data.marca
+        ) {
             res.status(400).json({ message: 'Faltan campos obligatorios' });
+            return;
+        }
+
+        if (!Array.isArray(data.stockPorTalla) || data.stockPorTalla.length === 0) {
+            res.status(400).json({ message: 'Stock por talla debe ser un arreglo con al menos un elemento' });
+            return;
         }
 
         const newProduct = await productRepository.create(data);

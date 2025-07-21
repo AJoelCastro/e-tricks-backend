@@ -1,12 +1,15 @@
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { IResenia } from './Resenia';
-
+export interface IStockPorTalla {
+  talla: number;
+  stock: number;
+}
 export interface IProductRequest {
     name?: string;
     description?: string;
     price?: number;
-    size?: string[];
-    stock?: number;
+    stockPorTalla?: IStockPorTalla[]; 
+    material?: Types.ObjectId
     category?: string;
     images?: string[];
     descuento?: number;
@@ -17,8 +20,8 @@ export interface IProduct extends Document {
     name: string;
     description: string;
     price: number;
-    size: string[];
-    stock: number;
+    stockPorTalla: IStockPorTalla[];
+    material: Types.ObjectId
     category: string;
     images: string[];
     descuento: number;
