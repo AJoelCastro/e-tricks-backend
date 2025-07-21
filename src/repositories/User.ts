@@ -115,4 +115,25 @@ export class UserRepository {
         }
     }
 
+      async getUserWithCart(userId: string) {
+        try {
+            return await UserModel.findOne({ userId })
+                .populate('cart.productId')
+                .exec();
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async clearUserCart(userId: string) {
+        try {
+            return await UserModel.updateOne(
+                { userId },
+                { $set: { cart: [] } }
+            );
+        } catch (error) {
+            throw error;
+        }
+    }
+
 }
