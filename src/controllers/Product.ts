@@ -32,7 +32,6 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
 export const createProduct = async (req: Request, res: Response): Promise<void> => {
     try {
         const data: IProductRequest = req.body;
-        console.log(data)
         if (
             !data.name || 
             !data.description || 

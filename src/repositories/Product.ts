@@ -4,7 +4,7 @@ import { ProductModel } from "../models/Product";
 export class ProductRepository {
     async getAll(){
         try{
-            return await ProductModel.find();
+            return await ProductModel.find().populate('material', 'name').populate('category', 'name').populate('brand', 'name');
         } catch (error) {
             throw error;
         }
