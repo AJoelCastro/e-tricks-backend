@@ -13,7 +13,7 @@ export interface IProductRequest {
     category?: string;
     images?: string[];
     descuento?: number;
-    marca?: string;
+    brand?: Types.ObjectId;
 }
 
 export interface IProduct extends Document {
@@ -25,7 +25,7 @@ export interface IProduct extends Document {
     category: string;
     images: string[];
     descuento: number;
-    marca: string;
+    brand: Types.ObjectId;
     resenias: IResenia[];
     createdAt: Date;
 }

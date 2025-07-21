@@ -29,7 +29,7 @@ const productSchema = new Schema<IProduct>({
   category: { type: String, required: true },
   images: { type: [String], default: [] },
   descuento: { type: Number, default: 0 },
-  marca: { type: String, required: true },
+  brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand', required: true },
   resenias: { type: [reseniaSchema], default: [] },
   createdAt: { type: Date, default: Date.now }
 });
