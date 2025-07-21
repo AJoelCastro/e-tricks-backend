@@ -11,7 +11,7 @@ export class ProductRepository {
     }
     async getById(id:string){
         try {
-            return await ProductModel.findById(id);
+            return await ProductModel.findById(id).populate('material', 'name').populate('category', 'name').populate('brand', 'name');
         } catch (error) {
             throw error;
         }
