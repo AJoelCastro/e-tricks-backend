@@ -39,4 +39,13 @@ export class BrandRepository {
             throw error;
         }
     }
+
+    async exists(name: string) {
+        try {
+            const brand = await BrandModel.findOne({ name });
+            return !!brand;
+        } catch (error) {
+            throw error;
+        }
+    }
 }

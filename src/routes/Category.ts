@@ -10,12 +10,10 @@ const authenticateClerkToken = require('../middleware/auth');
 
 const router = express.Router();
 
-
 router.get('/get', getCategories);
 router.get('/:id/get', getCategoryById);
 
-
-router.post('/create', authenticateClerkToken, createCategory);
+router.post('/create', createCategory);
 router.put('/:id/update', authenticateClerkToken, updateCategory);
 router.delete('/:id/delete', authenticateClerkToken, deleteCategory);
 

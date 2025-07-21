@@ -34,6 +34,11 @@ export const createBrand = async (req: Request, res: Response): Promise<void> =>
             res.status(400).json({ message: "Faltan el nombre de la marca" });
             return;
         }
+        const exists = await brandRepository.exists(data.name);
+        if (exists) {
+            res.status(400).json({ message: "La marca ya existe" });
+            return;
+        }
         const newBrand = await brandRepository.create(data);
         res.status(201).json(newBrand);
     } catch (error) {
