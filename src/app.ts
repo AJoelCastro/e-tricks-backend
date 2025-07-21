@@ -6,6 +6,7 @@ import cors from 'cors';
 import connectDB from './config/database';
 import productRoutes from './routes/Product';
 import userRoutes from './routes/User';
+import brandRoutes from './routes/Brand';
 dotenv.config();
 
 const app: Express = express();
@@ -33,6 +34,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 // Routes
 app.use('/product', productRoutes);
 app.use('/user', userRoutes)
+app.use('/brand', brandRoutes);
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
     res.status(200).json({ status: 'OK', message: 'Server is running' });
