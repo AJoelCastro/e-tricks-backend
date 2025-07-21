@@ -32,22 +32,23 @@ export const getCategoryById = async (req: Request, res: Response): Promise<void
     }
 };
 
+
 export const createCategory = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { description }: ICategoryRequest = req.body;
+        const { name }: ICategoryRequest = req.body;
 
-        if (!description) {
-            res.status(400).json({ message: 'Description is required' });
+        if (!name) {
+            res.status(400).json({ message: 'Name is required' });
             return;
         }
 
-        const exists = await categoryRepository.exists(description);
+        const exists = await categoryRepository.exists(name);
         if (exists) {
             res.status(400).json({ message: 'Category already exists' });
             return;
         }
 
-        const newCategory = await categoryRepository.create({ description });
+        const newCategory = await categoryRepository.create({ name });
         res.status(201).json(newCategory);
     } catch (error) {
         res.status(400).json({ 
@@ -60,14 +61,14 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
 export const updateCategory = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
-        const { description }: ICategoryUpdateRequest = req.body;
+        const { name }: ICategoryUpdateRequest = req.body;
 
-        if (!description) {
-            res.status(400).json({ message: 'Description is required' });
+        if (!name) {
+            res.status(400).json({ message: 'Name is required' });
             return;
         }
 
-        const updatedCategory = await categoryRepository.update(id, { description });
+        const updatedCategory = await categoryRepository.update(id, { name });
         if (!updatedCategory) {
             res.status(404).json({ message: 'Category not found' });
             return;

@@ -1,13 +1,16 @@
 import { Document, Types } from "mongoose";
 
-export interface ICategory {
-    description: string;
+export interface ICategory extends Document {
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface ICategoryRequest {
-    description: string;
+    name: string;
 }
 
 export interface ICategoryUpdateRequest {
-    description?: string;
+    name?: string;
+    updatedAt?: Date;
 }

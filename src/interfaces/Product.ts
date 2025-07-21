@@ -10,7 +10,7 @@ export interface IProductRequest {
     price?: number;
     stockPorTalla?: IStockPorTalla[]; 
     material?: Types.ObjectId
-    category?: string;
+    category?: Types.ObjectId;
     images?: string[];
     descuento?: number;
     brand?: Types.ObjectId;
@@ -22,7 +22,7 @@ export interface IProduct extends Document {
     price: number;
     stockPorTalla: IStockPorTalla[];
     material: Types.ObjectId
-    category: string;
+    category: Types.ObjectId;
     images: string[];
     descuento: number;
     brand: Types.ObjectId;

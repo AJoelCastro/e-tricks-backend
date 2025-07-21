@@ -1,8 +1,7 @@
 import { Document } from "mongoose";
 
 export interface IBrandRequest {
-    name?: string;
-    createdAt?: Date;
+    name: string;
     updatedAt?: Date;
 }
 export interface IBrand extends Document {

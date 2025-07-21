@@ -33,8 +33,8 @@ export class CategoryRepository {
         return await CategoryModel.findByIdAndDelete(id);
     }
 
-    async exists(description: string): Promise<boolean> {
-        const category = await CategoryModel.findOne({ description });
+    async exists(name: string): Promise<boolean> {
+        const category = await CategoryModel.findOne({ name });
         return !!category;
     }
 }
