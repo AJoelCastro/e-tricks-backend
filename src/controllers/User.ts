@@ -24,7 +24,7 @@ export const verifyUser = async (req: Request, res: Response): Promise<void> =>{
             cart: []
         }
         const verify = await userRepository.verifyExistUser(userId);
-        if(verify===null){
+        if(verify===null || verify.length === 0){
             const dataCreate = await createFavoriteCartList(data);
             res.status(201).json(dataCreate)
             return;
