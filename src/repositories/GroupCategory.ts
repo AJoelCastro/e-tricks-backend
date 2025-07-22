@@ -28,8 +28,8 @@ export class GroupCategoryRepository {
         return await GroupCategoryModel.findByIdAndDelete(id);
     }
 
-    async exists(description: string): Promise<boolean> {
-        const groupCategory = await GroupCategoryModel.findOne({ description });
+    async exists(name: string): Promise<boolean> {
+        const groupCategory = await GroupCategoryModel.findOne({ name });
         return !!groupCategory;
     }
 

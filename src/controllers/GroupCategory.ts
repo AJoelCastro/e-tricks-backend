@@ -38,25 +38,28 @@ export const getGroupCategoryById = async (req: Request, res: Response): Promise
 
 export const createGroupCategory = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { description, categories, active }: IGroupCategoryRequest = req.body;
+        const { name, description, categories, active,image }: IGroupCategoryRequest = req.body;
 
-        if (!description || !categories || categories.length === 0) {
+        if (!name || !categories || categories.length === 0) {
             res.status(400).json({ 
-                message: 'Description and at least one category are required' 
+                message: 'Name and at least one category are required' 
             });
             return;
         }
 
-        const exists = await groupCategoryRepository.exists(description);
+        const exists = await groupCategoryRepository.exists(name);
         if (exists) {
-            res.status(400).json({ message: 'Group category with this description already exists' });
+            res.status(400).json({ message: 'Group category with this name already exists' });
             return;
         }
 
         const newGroupCategory = await groupCategoryRepository.create({ 
+            name,
             description, 
             categories, 
-            active: active ?? true 
+            active: active ?? true ,
+            image
+
         });
         res.status(201).json(newGroupCategory);
     } catch (error) {
