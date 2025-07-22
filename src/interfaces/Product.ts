@@ -29,3 +29,5 @@ export interface IProduct extends Document {
     resenias: IResenia[];
     createdAt: Date;
 }
+
+

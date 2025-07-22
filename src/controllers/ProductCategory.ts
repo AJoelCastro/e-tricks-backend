@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { CategoryRepository } from '../repositories/Category';
-import { ICategoryRequest, ICategoryUpdateRequest } from '../interfaces/Category';
+import { ProductCategoryRepository } from '../repositories/ProductCategory';
+import { IProductCategoryRequest, IProductCategoryUpdateRequest } from '../interfaces/ProductCategory';
 
-const categoryRepository = new CategoryRepository();
+const categoryRepository = new ProductCategoryRepository();
 
 export const getCategories = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -35,7 +35,7 @@ export const getCategoryById = async (req: Request, res: Response): Promise<void
 
 export const createCategory = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { name }: ICategoryRequest = req.body;
+        const { name }: IProductCategoryRequest = req.body;
 
         if (!name) {
             res.status(400).json({ message: 'Name is required' });
@@ -61,7 +61,7 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
 export const updateCategory = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
-        const { name }: ICategoryUpdateRequest = req.body;
+        const { name }: IProductCategoryUpdateRequest = req.body;
 
         if (!name) {
             res.status(400).json({ message: 'Name is required' });

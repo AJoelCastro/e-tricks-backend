@@ -5,7 +5,7 @@ import {
     createCategory,
     updateCategory,
     deleteCategory
-} from '../controllers/Category';
+} from '../controllers/ProductCategory';
 const authenticateClerkToken = require('../middleware/auth');
 
 const router = express.Router();
