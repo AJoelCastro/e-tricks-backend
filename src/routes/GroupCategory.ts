@@ -6,8 +6,7 @@ import {
     updateGroupCategory,
     toggleGroupCategoryStatus,
     deleteGroupCategory,
-    getProductsByGroupCategory,
-    getCategoriesFromGroup
+    getSubCategoriesFromGroup
 } from '../controllers/GroupCategory';
 const authenticateClerkToken = require('../middleware/auth');
 
@@ -16,8 +15,7 @@ const router = express.Router();
 
 router.get('/get', getGroupCategories);
 router.get('/:id/get', getGroupCategoryById);
-router.get('/:id/products', getProductsByGroupCategory);
-router.get('/:id/categories', getCategoriesFromGroup);
+router.get('/:id/subcategories', getSubCategoriesFromGroup);
 
 
 router.post('/create', authenticateClerkToken, createGroupCategory);

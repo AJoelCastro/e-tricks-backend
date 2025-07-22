@@ -5,11 +5,11 @@ import { IGroupCategory, IGroupCategoryRequest, IGroupCategoryUpdateRequest } fr
 export class GroupCategoryRepository {
     async getAll(activeOnly: boolean = true): Promise<IGroupCategory[]> {
         const query = activeOnly ? { active: true } : {};
-        return await GroupCategoryModel.find(query).populate('categories');
+        return await GroupCategoryModel.find(query).populate('subcategories');
     }
 
     async getById(id: string): Promise<IGroupCategory | null> {
-        return await GroupCategoryModel.findById(id).populate('categories');
+        return await GroupCategoryModel.findById(id).populate('subcategories');
     }
 
     async create(data: IGroupCategoryRequest): Promise<IGroupCategory> {
@@ -21,7 +21,7 @@ export class GroupCategoryRepository {
             id, 
             data, 
             { new: true }
-        ).populate('categories');
+        ).populate('subcategories');
     }
 
     async delete(id: string): Promise<IGroupCategory | null> {
@@ -41,31 +41,18 @@ export class GroupCategoryRepository {
         return await groupCategory.save();
     }
 
-    async getCategoriesFromGroup(groupCategoryId: string): Promise<any[]> {
+    async getSubCategoriesFromGroup(groupCategoryId: string): Promise<any[]> {
         const groupCategory = await GroupCategoryModel.findById(groupCategoryId)
-            .populate('categories');
+            .populate('subcategories');
         
         if (!groupCategory) {
             throw new Error('Group category not found');
         }
 
-        return groupCategory.categories;
+        return groupCategory.subcategories;
     }
 
-    async getProductsByGroupCategory(groupCategoryId: string): Promise<any[]> {
-        const groupCategory = await GroupCategoryModel.findById(groupCategoryId);
-        if (!groupCategory) {
-            throw new Error('Group category not found');
-        }
+      
 
-        const query: any = {
-            category: { $in: groupCategory.categories }
-        };
-
-        return await ProductModel.find(query)
-            .populate('category')
-            .populate('material')
-            .populate('brand')
-            .sort({ createdAt: -1 });
-    }
+   
 }

@@ -38,11 +38,11 @@ export const getGroupCategoryById = async (req: Request, res: Response): Promise
 
 export const createGroupCategory = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { name, description, categories, active,image }: IGroupCategoryRequest = req.body;
+        const { name, description, subcategories,active , brands}: IGroupCategoryRequest = req.body;
 
-        if (!name || !categories || categories.length === 0) {
+        if (!name || !brands || brands.length === 0 ) {
             res.status(400).json({ 
-                message: 'Name and at least one category are required' 
+                message: 'Name and at least one brand are required' 
             });
             return;
         }
@@ -56,9 +56,9 @@ export const createGroupCategory = async (req: Request, res: Response): Promise<
         const newGroupCategory = await groupCategoryRepository.create({ 
             name,
             description, 
-            categories, 
+            subcategories, 
             active: active ?? true ,
-            image
+            brands
 
         });
         res.status(201).json(newGroupCategory);
@@ -75,7 +75,7 @@ export const updateGroupCategory = async (req: Request, res: Response): Promise<
         const { id } = req.params;
         const data: IGroupCategoryUpdateRequest = req.body;
 
-        if (data.categories && data.categories.length === 0) {
+        if (data.subcategories && data.subcategories.length === 0 && data.brands && data.brands.length === 0) {
             res.status(400).json({ message: 'Must include at least one category' });
             return;
         }
@@ -136,14 +136,14 @@ export const deleteGroupCategory = async (req: Request, res: Response): Promise<
     }
 };
 
-export const getCategoriesFromGroup = async (req: Request, res: Response): Promise<void> => {
+export const getSubCategoriesFromGroup = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
-        const categories = await groupCategoryRepository.getCategoriesFromGroup(id);
+        const subcategories = await groupCategoryRepository.getSubCategoriesFromGroup(id);
         
         res.status(200).json({
             success: true,
-            data: categories
+            data: subcategories
         });
     } catch (error) {
         res.status(500).json({ 
@@ -154,20 +154,3 @@ export const getCategoriesFromGroup = async (req: Request, res: Response): Promi
     }
 };
 
-export const getProductsByGroupCategory = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const { id } = req.params;    
-        const products = await groupCategoryRepository.getProductsByGroupCategory(id);
-
-        res.status(200).json({
-            success: true,
-            data: products
-        });
-    } catch (error) {
-        res.status(500).json({ 
-            success: false,
-            message: 'Error fetching products for group category', 
-            error: error instanceof Error ? error.message : error 
-        });
-    }
-};

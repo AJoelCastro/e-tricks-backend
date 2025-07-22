@@ -26,7 +26,7 @@ const productSchema = new Schema<IProduct>({
     required: true
   },
   material: { type: mongoose.Schema.Types.ObjectId, ref: 'Material', required: true },
-  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
+  category: { type: mongoose.Schema.Types.ObjectId, ref: 'ProductCategory', required: true },
   images: { type: [String], default: [] },
   descuento: { type: Number, default: 0 },
   brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand', required: true },

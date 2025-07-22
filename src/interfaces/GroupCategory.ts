@@ -3,9 +3,9 @@ import { Document, Types } from "mongoose";
 export interface IGroupCategory extends Document {
     name:string;
     description: string;
-    categories: Types.ObjectId[];
+    subcategories: Types.ObjectId[];
     active: boolean;
-    image:string;
+    brands: Types.ObjectId[];
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -13,15 +13,16 @@ export interface IGroupCategory extends Document {
 export interface IGroupCategoryRequest {
     name:string;
     description: string;
-    categories: string[]; 
+    subcategories: string[]; 
     active?: boolean;
-    image:string;
+    brands: string[]; 
+
 }
 
 export interface IGroupCategoryUpdateRequest {
     name:string;
     description?: string;
-    categories?: string[];
+    subcategories?: string[];
     active?: boolean;
-    image:string;
+    brands: string[]; 
 }

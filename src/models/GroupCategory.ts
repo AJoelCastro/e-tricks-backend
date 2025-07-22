@@ -12,19 +12,20 @@ const GroupCategorySchema = new Schema<IGroupCategory>({
         type: String,
         required: false,
     },
-    categories: [{
+    subcategories: [{
         type: Schema.Types.ObjectId,
-        ref: 'Category',
+        ref: 'SubCategory',
         required: true
     }],
     active: {
         type: Boolean,
         default: true
     },
-    image: {
-        type: String,
-        required: false,
-    },
+    brands: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Brand',
+        required: true
+    }],
 }, {
     timestamps: true,
     versionKey: false
