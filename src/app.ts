@@ -7,7 +7,7 @@ import connectDB from './config/database';
 import productRoutes from './routes/Product';
 import userRoutes from './routes/User';
 import brandRoutes from './routes/Brand';
-import categoryRoutes from './routes/GroupCategory';
+import categoryRoutes from './routes/Category';
 import materialRoutes from './routes/Material';
 import groupCategoryRoutes from './routes/GroupCategory';
 import subCategoryRoutes from './routes/SubCategory';

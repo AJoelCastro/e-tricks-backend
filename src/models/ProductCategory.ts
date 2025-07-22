@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { IProductCategory } from '../interfaces/ProductCategory';
 
-const CategorySchema = new Schema<IProductCategory>({
+const ProductCategorySchema = new Schema<IProductCategory>({
     name: {
         type: String,
         required: true
@@ -10,4 +10,4 @@ const CategorySchema = new Schema<IProductCategory>({
     updatedAt: { type: Date, default: Date.now }
 });
 
-export const ProductCategoryModel = mongoose.model<IProductCategory>('ProductCategory', CategorySchema);
+export const ProductCategoryModel = mongoose.model<IProductCategory>('ProductCategory', ProductCategorySchema);

@@ -8,6 +8,7 @@ export interface IProductCategory extends Document {
 
 export interface IProductCategoryRequest {
     name: string;
+    updatedAt?: Date;
 }
 
 export interface IProductCategoryUpdateRequest {
