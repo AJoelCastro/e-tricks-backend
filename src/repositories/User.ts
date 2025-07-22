@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 export class UserRepository {
     async verifyExistUser (userId:string){
         try{
-            return await UserModel.findOne({userId: userId});
+            return await UserModel.find({userId: userId});
         }catch(error){
             throw error;
         }
