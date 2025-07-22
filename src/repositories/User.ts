@@ -26,7 +26,16 @@ export class UserRepository {
     }
     async getFavorites (userId:string){
         try {
-            return await UserModel.findOne({userId: userId}).populate('favorites').select('favorites -_id');
+            return await UserModel.findOne({ userId: userId })
+                .select('favorites -_id')
+                .populate({
+                    path: 'favorites',
+                    populate: [
+                    { path: 'brand', select: 'name' },
+                    { path: 'category', select: 'name' },
+                    { path: 'material', select: 'name' }
+                    ]
+                });
         } catch (error) {
             throw error;
         }
