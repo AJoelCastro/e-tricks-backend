@@ -1,5 +1,6 @@
-import express from "express";
-import { 
+import express from 'express'
+import bodyParser from 'body-parser';
+import {
     createOrder,
     confirmOrderPayment,
     getOrderDetails,
@@ -15,7 +16,7 @@ const router = express.Router();
 router.post('/checkout', authenticateClerkToken, createOrder as any);
 
 
-router.post('/checkout/payment/confirm', authenticateClerkToken, confirmOrderPayment as any );
+router.post('/checkout/payment/confirm', authenticateClerkToken, confirmOrderPayment as any);
 
 
 router.get('/:orderId', authenticateClerkToken, getOrderDetails as any);
@@ -24,9 +25,12 @@ router.get('/:orderId', authenticateClerkToken, getOrderDetails as any);
 router.get('/user/:userId', authenticateClerkToken, getUserOrders as any);
 
 
-router.delete('/:orderId', authenticateClerkToken, cancelOrder as any);
+router.delete('/:orderId', authenticateClerkToken, cancelOrder as any );
 
 
-router.post('/webhook', express.raw({type: 'application/json'}), handleOrderWebhook as any);
+router.post('/webhook',
+    bodyParser.raw({ type: 'application/json' }),
+    handleOrderWebhook as any
+);
 
 export default router;
