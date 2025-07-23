@@ -19,8 +19,13 @@ const SubCategorySchema = new Schema<ISubCategory>({
     },
     image: {
         type: String,
-        required: false,
+        required: true,
     },
+    mobileimage: {
+        type: String,
+        required: true,
+    },
+
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 }, {

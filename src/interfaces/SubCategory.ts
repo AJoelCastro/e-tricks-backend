@@ -5,6 +5,7 @@ export interface ISubCategory extends Document {
     productcategories: Types.ObjectId[];
     active: boolean;
     image:string;
+    mobileimage:string;
     createdAt: Date;
     updatedAt: Date
 }
@@ -14,6 +15,7 @@ export interface ISubCategoryRequest {
     productcategories: string[]; 
     active?: boolean;
     image:string;
+    mobileimage:string;
 }
 
 export interface ISubCategoryUpdateRequest {
@@ -21,4 +23,5 @@ export interface ISubCategoryUpdateRequest {
     productcategories?: string[];
     active?: boolean;
     image:string;
+    mobileimage:string;
 }

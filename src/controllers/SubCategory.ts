@@ -38,9 +38,9 @@ export const getSubCategoryById = async (req: Request, res: Response): Promise<v
 
 export const createSubCategory = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { name,  productcategories,active , image}: ISubCategoryRequest = req.body;
+        const { name,  productcategories,active , image,mobileimage}: ISubCategoryRequest = req.body;
 
-        if (!name ||  !productcategories ||  productcategories.length === 0 ) {
+        if (!name ||  !productcategories ||  productcategories.length === 0  ) {
             res.status(400).json({ 
                 message: 'Name and at least one brand are required' 
             });
@@ -57,7 +57,8 @@ export const createSubCategory = async (req: Request, res: Response): Promise<vo
             name,
             productcategories, 
             active: active ?? true ,
-            image
+            image,
+            mobileimage
 
         });
         res.status(201).json(newSubCategory);
@@ -74,7 +75,7 @@ export const updateSubCategory = async (req: Request, res: Response): Promise<vo
         const { id } = req.params;
         const data: ISubCategoryUpdateRequest = req.body;
 
-        if (data.productcategories && data.productcategories.length === 0 ) {
+        if ((data.productcategories && data.productcategories.length === 0) || !data.image || !data.mobileimage) {
             res.status(400).json({ message: 'Must include at least one category' });
             return;
         }
