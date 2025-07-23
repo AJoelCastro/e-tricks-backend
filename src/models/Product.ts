@@ -31,7 +31,10 @@ const productSchema = new Schema<IProduct>({
   descuento: { type: Number, default: 0 },
   brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand', required: true },
   resenias: { type: [reseniaSchema], default: [] },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  isNewProduct: { type: Boolean, required: true},
+  isTrending: { type: Boolean, default: false },
+  season: { type: String, default: '' },
 });
 
 

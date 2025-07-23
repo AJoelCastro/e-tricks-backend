@@ -6,8 +6,8 @@ export interface IGroupCategory extends Document {
     subcategories: Types.ObjectId[];
     active: boolean;
     brands: Types.ObjectId[];
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface IGroupCategoryRequest {
@@ -16,7 +16,6 @@ export interface IGroupCategoryRequest {
     subcategories: string[]; 
     active?: boolean;
     brands: string[]; 
-
 }
 
 export interface IGroupCategoryUpdateRequest {

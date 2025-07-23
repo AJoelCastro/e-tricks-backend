@@ -23,4 +23,20 @@ export class ProductRepository {
             throw error;
         }
     }
+
+    async delete(id:string){
+        try {
+            return await ProductModel.findByIdAndDelete(id);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async update(id:string, product:IProductRequest){
+        try {
+            return await ProductModel.findByIdAndUpdate(id, product, { new: true });
+        } catch (error) {
+            throw error;
+        }
+    }
 }

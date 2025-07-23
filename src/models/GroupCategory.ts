@@ -26,6 +26,8 @@ const GroupCategorySchema = new Schema<IGroupCategory>({
         ref: 'Brand',
         required: true
     }],
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
 }, {
     timestamps: true,
     versionKey: false

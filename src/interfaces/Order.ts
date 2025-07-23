@@ -17,6 +17,6 @@ export interface IOrder extends Document {
     paymentId: string;
     paymentStatus: boolean;
     paymentMethod: string;
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt: Date;
+    updatedAt: Date;
 }

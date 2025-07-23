@@ -21,6 +21,8 @@ const SubCategorySchema = new Schema<ISubCategory>({
         type: String,
         required: false,
     },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
 }, {
     timestamps: false,
     versionKey: false

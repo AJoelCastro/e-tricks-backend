@@ -40,7 +40,9 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
             !data.material ||
             !data.category || 
             !data.images || 
-            !data.brand
+            !data.brand ||
+            !data.season ||
+            !data.isNew 
         ) {
             res.status(400).json({ message: 'Faltan campos obligatorios' });
             return;
@@ -55,5 +57,28 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
         res.status(201).json(newProduct);
     } catch (error) {
         res.status(400).json({ message: 'Error al crear el producto', error });
+    }
+};
+
+// Actualizar un producto por ID
+export const updateProduct = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const productId = req.params.id;
+        const data: IProductRequest = req.body;
+        const updatedProduct = await productRepository.update(productId, data);
+        res.status(200).json(updatedProduct);
+    } catch (error) {
+        res.status(400).json({ message: 'Error al actualizar el producto', error });
+    }
+};
+
+// Eliminar un producto por ID
+export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const productId = req.params.id;
+        const deletedProduct = await productRepository.delete(productId);
+        res.status(200).json(deletedProduct);
+    } catch (error) {
+        res.status(400).json({ message: 'Error al eliminar el producto', error });
     }
 };

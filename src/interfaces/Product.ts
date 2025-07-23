@@ -14,6 +14,9 @@ export interface IProductRequest {
     images?: string[];
     descuento?: number;
     brand?: Types.ObjectId;
+    isNew?: boolean;
+    isTrending?: boolean;
+    season?: string
 }
 
 export interface IProduct extends Document {
@@ -27,6 +30,9 @@ export interface IProduct extends Document {
     descuento: number;
     brand: Types.ObjectId;
     resenias: IResenia[];
+    isNewProduct: boolean;
+    isTrending: boolean;
+    season: string;
     createdAt: Date;
 }
 

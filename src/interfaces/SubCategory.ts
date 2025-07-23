@@ -5,6 +5,8 @@ export interface ISubCategory extends Document {
     productcategories: Types.ObjectId[];
     active: boolean;
     image:string;
+    createdAt: Date;
+    updatedAt: Date
 }
 
 export interface ISubCategoryRequest {
