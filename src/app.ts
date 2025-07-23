@@ -11,6 +11,8 @@ import categoryRoutes from './routes/Category';
 import materialRoutes from './routes/Material';
 import groupCategoryRoutes from './routes/GroupCategory';
 import subCategoryRoutes from './routes/SubCategory';
+import pickUpRoutes from './routes/PickUp'
+
 dotenv.config();
 
 const app: Express = express();
@@ -43,6 +45,7 @@ app.use('/category', categoryRoutes);
 app.use('/material', materialRoutes);
 app.use('/groupCategory', groupCategoryRoutes);
 app.use('/subCategory', subCategoryRoutes);
+app.use('/pickUp', pickUpRoutes);
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
     res.status(200).json({ status: 'OK', message: 'Server is running' });
