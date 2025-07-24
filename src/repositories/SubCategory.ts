@@ -55,19 +55,26 @@ export class SubCategoryRepository {
       
 
     async getProductsByGroupCategory(subcategoryId: string): Promise<any[]> {
-        const subcategory = await SubCategoryModel.findById(subcategoryId);
-        if (!subcategory) {
-            throw new Error('Category not found');
+        try{
+            const subcategory = await SubCategoryModel.findById(subcategoryId);
+
+            if (!subcategory) {
+                throw new Error('Category not found');
+            }
+
+            const categoryIds = subcategory.productcategories.map((cat: any) => cat._id);
+
+            const products = await ProductModel.find({
+                category: { $in: categoryIds }
+            })
+                .populate('category')
+                .populate('material')
+                .populate('brand')
+                .sort({ createdAt: -1 });
+
+            return products;
+        } catch (error) {
+            throw error;
         }
-
-        const query: any = {
-            productcategory: { $in: subcategory.productcategories }
-        };
-
-        return await ProductModel.find(query)
-            .populate('productcategory')
-            .populate('material')
-            .populate('brand')
-            .sort({ createdAt: -1 });
     }
 }

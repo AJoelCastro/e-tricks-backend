@@ -133,7 +133,6 @@ export const getCategoriesFromGroup = async (req: Request, res: Response): Promi
     try {
         const { id } = req.params;
         const subcategories = await subCategoryRepository.getCategoriesFromGroup(id);
-        
         res.status(200).json({
             success: true,
             data: subcategories
@@ -151,9 +150,8 @@ export const getCategoriesFromGroup = async (req: Request, res: Response): Promi
 
 export const getProductsBySubCategory = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { id } = req.params;    
+        const { id } = req.params;   
         const products = await subCategoryRepository.getProductsByGroupCategory(id);
-
         res.status(200).json({
             success: true,
             data: products
