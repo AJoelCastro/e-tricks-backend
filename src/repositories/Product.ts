@@ -39,4 +39,26 @@ export class ProductRepository {
             throw error;
         }
     }
+
+    async getByIdGroupByIdSubByIdCategoryProduct (idGroup:string, idSub:string, idCategory:string){
+        try {
+            return await ProductModel.find({groupCategory: idGroup,subCategory: idSub,category: idCategory}).populate('material', 'name').populate('category', 'name').populate('brand', 'name');
+        } catch (error) {
+            throw error;
+        }
+    }
+    async getByIdGroupByIdSubProduct(idGroup: string, idSub: string) {
+        try {
+            return await ProductModel.find({
+            groupCategory: idGroup,
+            subCategory: idSub
+            })
+            .populate('material', 'name')
+            .populate('category', 'name')
+            .populate('brand', 'name');
+        } catch (error) {
+            throw error;
+        }
+    }
+
 }

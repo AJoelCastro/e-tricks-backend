@@ -5,16 +5,18 @@ export interface IStockPorTalla {
   stock: number;
 }
 export interface IProductRequest {
-    name?: string;
+    name: string;
     description?: string;
-    price?: number;
+    price: number;
     stockPorTalla?: IStockPorTalla[]; 
     material?: Types.ObjectId
-    category?: Types.ObjectId;
+    category: Types.ObjectId;
+    subCategory: Types.ObjectId;
+    groupCategory: Types.ObjectId;
     images?: string[];
     descuento?: number;
     brand?: Types.ObjectId;
-    isNew?: boolean;
+    isNewProduct?: boolean;
     isTrending?: boolean;
     season?: string
 }
@@ -26,6 +28,8 @@ export interface IProduct extends Document {
     stockPorTalla: IStockPorTalla[];
     material: Types.ObjectId
     category: Types.ObjectId;
+    subCategory: Types.ObjectId;
+    groupCategory: Types.ObjectId;
     images: string[];
     descuento: number;
     brand: Types.ObjectId;

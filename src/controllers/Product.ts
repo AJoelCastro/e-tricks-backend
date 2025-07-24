@@ -41,8 +41,9 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
             !data.category || 
             !data.images || 
             !data.brand ||
-            !data.season ||
-            !data.isNew 
+            !data.isNewProduct ||
+            !data.subCategory ||
+            !data.groupCategory
         ) {
             res.status(400).json({ message: 'Faltan campos obligatorios' });
             return;
@@ -82,3 +83,34 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
         res.status(400).json({ message: 'Error al eliminar el producto', error });
     }
 };
+
+export const getByIdGroupByIdSubByIdCategoryProduct = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const groupCategory = req.params.groupCategory;
+        const subCategory = req.params.subCategory;
+        const prodCategory = req.params.prodCategory;
+        const products = await productRepository.getByIdGroupByIdSubByIdCategoryProduct( groupCategory, subCategory, prodCategory);
+        if (!products) {
+            res.status(404).json({ message: 'Productos no encontrados' });
+            return;
+        }
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener los productos', error });
+    }
+}
+
+export const getByIdGroupByIdSubProduct = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const groupCategory = req.params.groupCategory;
+        const subCategory = req.params.subCategory;
+        const products = await productRepository.getByIdGroupByIdSubProduct( groupCategory, subCategory);
+        if (!products) {
+            res.status(404).json({ message: 'Productos no encontrados' });
+            return;
+        }
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener los productos', error });
+    }
+}

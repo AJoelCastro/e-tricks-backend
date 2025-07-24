@@ -19,6 +19,18 @@ export const getGroupCategories = async (req: Request, res: Response): Promise<v
         });
     }
 };
+export const getProductsByGroupCategories = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const activeOnly = req.query.activeOnly !== 'false';
+        const groupCategories = await groupCategoryRepository.getAll(activeOnly);
+        res.status(200).json(groupCategories);
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'Error fetching group categories', 
+            error: error instanceof Error ? error.message : error 
+        });
+    }
+};
 
 export const getGroupCategoryById = async (req: Request, res: Response): Promise<void> => {
     try {
