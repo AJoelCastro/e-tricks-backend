@@ -38,29 +38,22 @@ export const getSubCategoryById = async (req: Request, res: Response): Promise<v
 
 export const createSubCategory = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { name,  productcategories,active , image,mobileimage}: ISubCategoryRequest = req.body;
+        const data: ISubCategoryRequest = req.body;
 
-        if (!name ||  !productcategories ||  productcategories.length === 0  ) {
+        if (!data.name ||  !data.productcategories ||  data.productcategories.length === 0  ) {
             res.status(400).json({ 
                 message: 'Name and at least one brand are required' 
             });
             return;
         }
 
-        const exists = await subCategoryRepository.exists(name);
+        const exists = await subCategoryRepository.exists(data.name);
         if (exists) {
             res.status(400).json({ message: 'Sub category with this name already exists' });
             return;
         }
 
-        const newSubCategory = await subCategoryRepository.create({ 
-            name,
-            productcategories, 
-            active: active ?? true ,
-            image,
-            mobileimage
-
-        });
+        const newSubCategory = await subCategoryRepository.create(data);
         res.status(201).json(newSubCategory);
     } catch (error) {
         res.status(400).json({ 
@@ -75,7 +68,7 @@ export const updateSubCategory = async (req: Request, res: Response): Promise<vo
         const { id } = req.params;
         const data: ISubCategoryUpdateRequest = req.body;
 
-        if ((data.productcategories && data.productcategories.length === 0) || !data.image || !data.mobileimage) {
+        if ((data.productcategories && data.productcategories.length === 0) || !data.image ) {
             res.status(400).json({ message: 'Must include at least one category' });
             return;
         }

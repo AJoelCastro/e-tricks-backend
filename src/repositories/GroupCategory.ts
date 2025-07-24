@@ -5,11 +5,21 @@ import { IGroupCategory, IGroupCategoryRequest, IGroupCategoryUpdateRequest } fr
 export class GroupCategoryRepository {
     async getAll(activeOnly: boolean = true): Promise<IGroupCategory[]> {
         const query = activeOnly ? { active: true } : {};
-        return await GroupCategoryModel.find(query).populate('subcategories');
+        return await GroupCategoryModel.find(query).populate({
+            path: 'subcategories',
+            populate: {
+                path: 'productcategories'
+            }
+        });
     }
 
     async getById(id: string): Promise<IGroupCategory | null> {
-        return await GroupCategoryModel.findById(id).populate('subcategories');
+        return await GroupCategoryModel.findById(id).populate({
+            path: 'subcategories',
+            populate: {
+                path: 'productcategories'
+            }
+        });
     }
 
     async create(data: IGroupCategoryRequest): Promise<IGroupCategory> {

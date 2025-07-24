@@ -5,6 +5,7 @@ export interface IGroupCategory extends Document {
     description: string;
     subcategories: Types.ObjectId[];
     active: boolean;
+    routeLink: string;
     brands: Types.ObjectId[];
     createdAt: Date;
     updatedAt: Date;
@@ -16,6 +17,7 @@ export interface IGroupCategoryRequest {
     subcategories: string[]; 
     active?: boolean;
     brands: string[]; 
+    routeLink: string;
 }
 
 export interface IGroupCategoryUpdateRequest {
@@ -24,4 +26,5 @@ export interface IGroupCategoryUpdateRequest {
     subcategories?: string[];
     active?: boolean;
     brands: string[]; 
+    routeLink: string;
 }

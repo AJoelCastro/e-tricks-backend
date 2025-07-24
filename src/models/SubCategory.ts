@@ -13,6 +13,10 @@ const SubCategorySchema = new Schema<ISubCategory>({
         ref: 'ProductCategory',
         required: true
     }],
+    routeLink: {
+        type: String,
+        required: true,
+    },
     active: {
         type: Boolean,
         default: true
@@ -21,11 +25,6 @@ const SubCategorySchema = new Schema<ISubCategory>({
         type: String,
         required: true,
     },
-    mobileimage: {
-        type: String,
-        required: true,
-    },
-
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 }, {

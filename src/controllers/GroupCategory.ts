@@ -38,29 +38,22 @@ export const getGroupCategoryById = async (req: Request, res: Response): Promise
 
 export const createGroupCategory = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { name, description, subcategories,active , brands}: IGroupCategoryRequest = req.body;
+        const data: IGroupCategoryRequest = req.body;
 
-        if (!name || !brands || brands.length === 0 ) {
+        if (!data.name || !data.brands || data.brands.length === 0 || !data.routeLink) {
             res.status(400).json({ 
                 message: 'Name and at least one brand are required' 
             });
             return;
         }
 
-        const exists = await groupCategoryRepository.exists(name);
+        const exists = await groupCategoryRepository.exists(data.name);
         if (exists) {
             res.status(400).json({ message: 'Group category with this name already exists' });
             return;
         }
 
-        const newGroupCategory = await groupCategoryRepository.create({ 
-            name,
-            description, 
-            subcategories, 
-            active: active ?? true ,
-            brands
-
-        });
+        const newGroupCategory = await groupCategoryRepository.create(data);
         res.status(201).json(newGroupCategory);
     } catch (error) {
         res.status(400).json({ 
@@ -140,7 +133,6 @@ export const getSubCategoriesFromGroup = async (req: Request, res: Response): Pr
     try {
         const { id } = req.params;
         const subcategories = await groupCategoryRepository.getSubCategoriesFromGroup(id);
-        
         res.status(200).json({
             success: true,
             data: subcategories

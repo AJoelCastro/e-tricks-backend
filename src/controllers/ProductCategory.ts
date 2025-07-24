@@ -35,20 +35,20 @@ export const getCategoryById = async (req: Request, res: Response): Promise<void
 
 export const createCategory = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { name }: IProductCategoryRequest = req.body;
+        const data: IProductCategoryRequest = req.body;
 
-        if (!name) {
+        if (!data.name) {
             res.status(400).json({ message: 'Name is required' });
             return;
         }
 
-        const exists = await categoryRepository.exists(name);
+        const exists = await categoryRepository.exists(data.name);
         if (exists) {
             res.status(400).json({ message: 'Category already exists' });
             return;
         }
 
-        const newCategory = await categoryRepository.create({ name });
+        const newCategory = await categoryRepository.create(data);
         res.status(201).json(newCategory);
     } catch (error) {
         res.status(400).json({ 

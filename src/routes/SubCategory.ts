@@ -19,7 +19,7 @@ router.get('/:id/get', getSubCategoryById);
 router.get('/:id/categories', getCategoriesFromGroup);
 router.get('/:id/products', getProductsBySubCategory);
 
-router.post('/create', authenticateClerkToken, createSubCategory);
+router.post('/create', createSubCategory);
 router.put('/:id/update', authenticateClerkToken, updateSubCategory);
 router.patch('/:id/toggle-status', authenticateClerkToken, toggleSubCategoryStatus);
 router.delete('/:id/delete', authenticateClerkToken, deleteSubCategory);

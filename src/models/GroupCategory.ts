@@ -21,6 +21,10 @@ const GroupCategorySchema = new Schema<IGroupCategory>({
         type: Boolean,
         default: true
     },
+    routeLink: {
+        type: String,
+        required: true,
+    },
     brands: [{
         type: Schema.Types.ObjectId,
         ref: 'Brand',

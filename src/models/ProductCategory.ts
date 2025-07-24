@@ -6,6 +6,10 @@ const ProductCategorySchema = new Schema<IProductCategory>({
         type: String,
         required: true
     },
+    routeLink: {
+        type: String,
+        required: true
+    },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });

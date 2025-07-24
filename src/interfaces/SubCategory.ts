@@ -4,8 +4,8 @@ export interface ISubCategory extends Document {
     name:string;
     productcategories: Types.ObjectId[];
     active: boolean;
+    routeLink: string;
     image:string;
-    mobileimage:string;
     createdAt: Date;
     updatedAt: Date
 }
@@ -14,14 +14,14 @@ export interface ISubCategoryRequest {
     name:string;
     productcategories: string[]; 
     active?: boolean;
+    routeLink: string;
     image:string;
-    mobileimage:string;
 }
 
 export interface ISubCategoryUpdateRequest {
     name:string;
     productcategories?: string[];
     active?: boolean;
+    routeLink: string;
     image:string;
-    mobileimage:string;
 }
