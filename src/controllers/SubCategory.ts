@@ -40,7 +40,7 @@ export const createSubCategory = async (req: Request, res: Response): Promise<vo
     try {
         const data: ISubCategoryRequest = req.body;
 
-        if (!data.name ||  !data.productcategories ||  data.productcategories.length === 0  ) {
+        if (!data.name ||  !data.productcategories ||  data.productcategories.length === 0 || !data.image || !data.routeLink || !data.bannerImage) {
             res.status(400).json({ 
                 message: 'Name and at least one brand are required' 
             });

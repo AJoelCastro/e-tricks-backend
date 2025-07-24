@@ -6,6 +6,7 @@ export interface ISubCategory extends Document {
     active: boolean;
     routeLink: string;
     image:string;
+    bannerImage: string;
     createdAt: Date;
     updatedAt: Date
 }
@@ -16,6 +17,7 @@ export interface ISubCategoryRequest {
     active?: boolean;
     routeLink: string;
     image:string;
+    bannerImage: string;
 }
 
 export interface ISubCategoryUpdateRequest {
@@ -23,5 +25,6 @@ export interface ISubCategoryUpdateRequest {
     productcategories?: string[];
     active?: boolean;
     routeLink: string;
-    image:string;
+    image?:string;
+    bannerImage?: string;
 }
