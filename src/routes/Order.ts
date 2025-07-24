@@ -6,31 +6,32 @@ import {
     getOrderDetails,
     getUserOrders,
     cancelOrder,
-    handleOrderWebhook
+    handleWebhook,
+
 } from "../controllers/Order";
 const authenticateClerkToken = require('../middleware/auth');
 
 const router = express.Router();
 
+// Crear nueva orden y obtener preferencia de MercadoPago
+router.post('/checkout', authenticateClerkToken, createOrder);
 
-router.post('/checkout', authenticateClerkToken, createOrder as any);
+// Confirmar pago manualmente (opcional)
+router.post('/checkout/payment/confirm', authenticateClerkToken, confirmOrderPayment );
 
+// Obtener detalles de una orden específica
+router.get('/:orderId', authenticateClerkToken, getOrderDetails);
 
-router.post('/checkout/payment/confirm', authenticateClerkToken, confirmOrderPayment as any);
+// Obtener todas las órdenes de un usuario
+router.get('/user/:userId', authenticateClerkToken, getUserOrders );
 
-
-router.get('/:orderId', authenticateClerkToken, getOrderDetails as any);
-
-
-router.get('/user/:userId', authenticateClerkToken, getUserOrders as any);
-
-
-router.delete('/:orderId', authenticateClerkToken, cancelOrder as any );
+// Cancelar una orden
+router.delete('/:orderId', authenticateClerkToken, cancelOrder );
 
 
 router.post('/webhook',
     bodyParser.raw({ type: 'application/json' }),
-    handleOrderWebhook as any
+    handleWebhook 
 );
 
 export default router;

@@ -49,7 +49,7 @@ app.use('/groupCategory', groupCategoryRoutes);
 app.use('/subCategory', subCategoryRoutes);
 app.use('/pickUp', pickUpRoutes);
 app.use('/order', orderRoutes);
-app.use('/order', couponRoutes);
+app.use('/coupon', couponRoutes);
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
     res.status(200).json({ status: 'OK', message: 'Server is running' });

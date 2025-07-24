@@ -50,7 +50,7 @@ export class CouponRepository {
 
     async listCoupons(filter: Partial<ICoupon> = {}) {
         try {
-            return await CouponModel.find(filter)
+            return await CouponModel.find({filter})
                 .sort({ createdAt: -1 })
                 .exec();
         } catch (error) {

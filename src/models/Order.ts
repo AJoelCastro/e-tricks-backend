@@ -50,8 +50,19 @@ const OrderSchema = new Schema<IOrder>({
         required: true
     },
     paymentStatus: {
-        type: Boolean,
-        default: false
+        type: String,
+        enum: [
+            'pending',          // Pago pendiente
+            'approved',         // Pago aprobado
+            'authorized',       // Pago autorizado pero no capturado
+            'in_process',       // Pago en proceso de revisión
+            'in_mediation',    // Pago en mediación
+            'rejected',        // Pago rechazado
+            'cancelled',       // Pago cancelado
+            'refunded',        // Pago reembolsado
+            'charged_back',    // Contracargo
+            'partially_refunded' // Reembolso parcial
+        ],
     },
     paymentMethod: {
         type: String,

@@ -1,7 +1,14 @@
 import { OrderModel } from "../models/Order";
 import { IOrder } from "../interfaces/Order";
+import { CouponRepository } from "./Coupon";
 
 export class OrderRepository {
+    private couponRepository: CouponRepository;
+
+    constructor() {
+        this.couponRepository = new CouponRepository();
+    }
+
     async createOrder(orderData: Omit<IOrder, 'createdAt' | 'updatedAt' | '_id'>) {
         try {
             const newOrder = new OrderModel(orderData);
@@ -59,6 +66,38 @@ export class OrderRepository {
     async cancelOrder(orderId: string) {
         try {
             return await this.updateOrder(orderId, { status: 'cancelled' });
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async applyCouponToOrder(orderId: string, couponCode: string, userId: string) {
+        try {
+            const order = await this.getOrderById(orderId);
+            if (!order) throw new Error('Orden no encontrada');
+
+            const coupon = await this.couponRepository.findValidCoupon(couponCode);
+            if (!coupon) throw new Error('Cupón no válido o expirado');
+
+            const discountAmount = order.subtotalAmount * (coupon.discountPercentage / 100);
+            const totalAmount = order.subtotalAmount - discountAmount;
+
+            return await this.updateOrder(orderId, {
+                couponCode: coupon.code,
+                discountAmount,
+                totalAmount
+            });
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async finalizeOrderWithCoupon(orderId: string) {
+        try {
+            const order = await this.getOrderById(orderId);
+            if (!order || !order.couponCode) return;
+
+            await this.couponRepository.markCouponAsUsed(order.couponCode, order.userId);
         } catch (error) {
             throw error;
         }
