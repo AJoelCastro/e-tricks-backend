@@ -47,7 +47,8 @@ const OrderSchema = new Schema<IOrder>({
     },
     paymentId: {
         type: String,
-        required: true
+        required: false,
+        default: 'xxxxx'
     },
     paymentStatus: {
         type: String,

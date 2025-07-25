@@ -5,6 +5,7 @@ import { Request, Response } from "express";
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import { OrderModel } from "../models/Order";
 import { UserRepository } from "../repositories/User";
+import { ProductModel } from '../models/Product';
 
 const userRepository = new UserRepository();
 const productRepository = new ProductRepository();
@@ -66,13 +67,13 @@ const createMercadoPagoPreference = async (order: any, user: any) => {
         },
         external_reference: order._id.toString(),
         notification_url: `${process.env.BACKEND_URL}/api/orders/webhook`,
-        back_urls: {
-            success: `${process.env.FRONTEND_URL}/order/success`,
-            failure: `${process.env.FRONTEND_URL}/order/failure`,
-            pending: `${process.env.FRONTEND_URL}/order/pending`
+     /*   back_urls: {
+            success: `${process.env.FRONTEND_URL}/carrito/order/success`,
+            failure: `${process.env.FRONTEND_URL}/carrito/order/failure`,
+            pending: `${process.env.FRONTEND_URL}/carrito/order/pending`
         },
-        auto_return: 'approved' as const,
-        statement_descriptor: 'TU TIENDA'
+        auto_return: 'approved' as const, */
+        statement_descriptor: 'TRICKS'
     };
 
     const response = await preference.create({
@@ -108,8 +109,9 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         let subtotalAmount = 0;
         const orderItems = await Promise.all(
             user.cart.map(async (item) => {
-                const product = await productRepository.getById(item.productId.toString());
+               // const product = await productRepository.getById(item.productId.toString());
 
+               const product =  await ProductModel.findById(item.productId);
                 if (!product) {
                     throw new Error(`Producto con ID ${item.productId} no encontrado`);
                 }
@@ -154,10 +156,12 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
 
         const preferenceResponse = await createMercadoPagoPreference(savedOrder, user);
 
+          console.log('paymentId',preferenceResponse.id)
 
         if (!preferenceResponse.id) {
             throw new Error('No se pudo obtener el ID de la preferencia de MercadoPago');
         }
+      
 
         savedOrder.paymentId = preferenceResponse.id;
         savedOrder.mercadoPagoPreferenceId = preferenceResponse.id;
@@ -173,7 +177,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         });
 
     } catch (error) {
-        console.error('Error al crear orden:', error);
+        console.error('Error al crear orden en servidor:', error);
         res.status(500).json({
             success: false,
             message: 'Error al crear orden',
