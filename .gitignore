@@ -44,4 +44,4 @@ pids/
 *.pid
 *.seed
 *.pid.lock
-e-tricks-backend.pem
+e-tricks.pem

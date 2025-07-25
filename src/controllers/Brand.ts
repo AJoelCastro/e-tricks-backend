@@ -29,9 +29,8 @@ export const getBrandById = async (req: Request, res: Response): Promise<void> =
 export const createBrand = async (req: Request, res: Response): Promise<void> => {
     try {
         const data: IBrandRequest = req.body;
-        console.log(data);
-        if (!data.name) {
-            res.status(400).json({ message: "Faltan el nombre de la marca" });
+        if (!data.name || !data.image) {
+            res.status(400).json({ message: "Faltan datos de la marca" });
             return;
         }
         const exists = await brandRepository.exists(data.name);
@@ -68,5 +67,14 @@ export const deleteBrand = async (req: Request, res: Response): Promise<void> =>
         res.status(200).json({ message: "Marca eliminada con éxito" });
     } catch (error) {
         res.status(500).json({ message: "Error al eliminar la marca", error });
+    }
+}
+
+export const getBrandsWithCategoryProducts = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const brands = await brandRepository.getBrandsWithCategoryProducts();
+        res.status(200).json(brands);
+    } catch (error) {
+        res.status(500).json({ message: "Error al obtener marcas con categorias de productos", error });
     }
 }

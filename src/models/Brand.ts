@@ -3,6 +3,7 @@ import { IBrand } from "../interfaces/Brand";
 
 const BrandSchema = new Schema<IBrand>({
     name: { type: String, required: true },
+    image: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });

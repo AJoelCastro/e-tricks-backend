@@ -1,5 +1,6 @@
 import { IBrandRequest } from "../interfaces/Brand";
 import { BrandModel } from "../models/Brand";
+import { ProductModel } from "../models/Product";
 export class BrandRepository {
     async getAll() {
         try {
@@ -48,4 +49,54 @@ export class BrandRepository {
             throw error;
         }
     }
+
+    async getBrandsWithCategoryProducts() {
+        try {
+            const result = await ProductModel.aggregate([
+                {
+                    $group: {
+                        _id: "$brand",
+                        categories: { $addToSet: "$category" } // extrae categorías únicas por brand
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "brands",
+                        localField: "_id",
+                        foreignField: "_id",
+                        as: "brand"
+                    }
+                },
+                {
+                    $unwind: "$brand"
+                },
+                {
+                    $lookup: {
+                        from: "productcategories",
+                        localField: "categories",
+                        foreignField: "_id",
+                        as: "categories"
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        brand: {
+                            _id: "$brand._id",
+                            name: "$brand.name" // o cualquier otro campo que tenga Brand
+                        },
+                        categories: {
+                            _id: 1,
+                            name: 1 // o los campos que necesites de Category
+                        }
+                    }
+                }
+            ]);
+
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
+
 }
