@@ -43,7 +43,8 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
             !data.brand ||
             !data.isNewProduct ||
             !data.subCategory ||
-            !data.groupCategory
+            !data.groupCategory ||
+            !data.caracteristicas
         ) {
             res.status(400).json({ message: 'Faltan campos obligatorios' });
             return;

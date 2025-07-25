@@ -17,6 +17,14 @@ const stockPorTallaSchema = new Schema(
   { _id: false }
 );
 
+const caracteristicaSchema = new Schema(
+  {
+    nombre: { type: String, required: true },
+    valor: { type: String, required: true }
+  },
+  { _id: false }
+)
+
 const productSchema = new Schema<IProduct>({
   name: { type: String, required: true },
   description: { type: String, required: true },
@@ -30,13 +38,14 @@ const productSchema = new Schema<IProduct>({
   subCategory: { type: mongoose.Schema.Types.ObjectId, ref: 'SubCategory', required: true },
   groupCategory: { type: mongoose.Schema.Types.ObjectId, ref: 'GroupCategory', required: true },
   images: { type: [String], default: [] },
-  descuento: { type: Number, default: 0 },
+  descuento: { type: Number, default: 0, min: 0, max: 100 },
+  caracteristicas: { type: [caracteristicaSchema], default: [] },
   brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand', required: true },
   resenias: { type: [reseniaSchema], default: [] },
   createdAt: { type: Date, default: Date.now },
   isNewProduct: { type: Boolean, required: true},
   isTrending: { type: Boolean, default: false },
-  season: { type: String, default: '' },
+  season: { type: String, enum: ['verano', 'invierno', 'otoño', 'primavera', ''], default: '' },
 });
 
 

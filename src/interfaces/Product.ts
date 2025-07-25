@@ -4,6 +4,10 @@ export interface IStockPorTalla {
   talla: number;
   stock: number;
 }
+export interface ICaracteristica {
+  nombre: string;
+  valor: string;
+}
 export interface IProductRequest {
     name: string;
     description?: string;
@@ -19,6 +23,7 @@ export interface IProductRequest {
     isNewProduct?: boolean;
     isTrending?: boolean;
     season?: string
+    caracteristicas?: ICaracteristica[];
 }
 
 export interface IProduct extends Document {
@@ -36,6 +41,7 @@ export interface IProduct extends Document {
     resenias: IResenia[];
     isNewProduct: boolean;
     isTrending: boolean;
+    caracteristicas: ICaracteristica[];
     season: string;
     createdAt: Date;
 }
