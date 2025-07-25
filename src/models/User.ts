@@ -16,6 +16,15 @@ const AddressSchema = new Schema(
   { _id: true } // 👈 esto es implícito, pero puedes dejarlo explícito si quieres
 );
 
+const CardSchema = new Schema({
+  card_id: { type: String, required: true },
+  last_four: String,
+  brand: String,
+  expiration_month: Number,
+  expiration_year: Number,
+}, { _id: false });
+
+
 const UserSchema = new Schema<IUser>({
   userId: {
     type: String,
@@ -46,10 +55,31 @@ const UserSchema = new Schema<IUser>({
       },
       processed: {
         type: Boolean,
-        default: false        
+        default: false
       }
     }
   ],
+  billing: {
+    customer_id: { type: String },
+    cards: [CardSchema]
+  },
+  personalInfo: {
+    name: { type: String },
+    lastname: { type: String },
+    document: {
+      type: {
+        type: String,
+        enum: ['DNI', 'CE', 'PASSPORT', 'OTHER'],
+        required: false
+      },
+      number: {
+        type: String,
+        required: false
+      }
+    },
+    phone: { type: String }
+  }
+   
 }, {
   timestamps: true
 });
