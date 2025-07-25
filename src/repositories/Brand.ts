@@ -83,7 +83,8 @@ export class BrandRepository {
                         _id: 0,
                         brand: {
                             _id: "$brand._id",
-                            name: "$brand.name" // o cualquier otro campo que tenga Brand
+                            name: "$brand.name", // o cualquier otro campo que tenga Brand
+                            image: "$brand.image"
                         },
                         categories: {
                             _id: 1,
