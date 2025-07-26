@@ -4,7 +4,9 @@ import {
     getProductById, 
     createProduct, 
     getByIdGroupByIdSubByIdCategoryProduct,
-    getByIdGroupByIdSubProduct
+    getByIdGroupByIdSubProduct,
+    getProductsWithDescuento,
+    getNewProducts
 } from '../controllers/Product';
 const authenticateClerkToken = require('../middleware/auth');
 
@@ -14,6 +16,8 @@ router.get('/get', getProducts);
 router.get('/:id/get', getProductById);
 router.get('/:groupCategory/:subCategory/:prodCategory/products', getByIdGroupByIdSubByIdCategoryProduct);
 router.get('/:groupCategory/:subCategory/products', getByIdGroupByIdSubProduct);
+router.get('/getWithDescuento', getProductsWithDescuento);
+router.get('/getNewProducts', getNewProducts);
 
 router.post('/create', createProduct);
 router.put('/:id/update',authenticateClerkToken, getProductById);

@@ -115,3 +115,29 @@ export const getByIdGroupByIdSubProduct = async (req: Request, res: Response): P
         res.status(500).json({ message: 'Error al obtener los productos', error });
     }
 }
+
+export const getProductsWithDescuento = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const products = await productRepository.getProductsWithDescuento();
+        if (!products) {
+            res.status(404).json({ message: 'Productos no encontrados' });
+            return;
+        }
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener los productos', error });
+    }
+}
+
+export const getNewProducts = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const products = await productRepository.getNewProducts();
+        if (!products) {
+            res.status(404).json({ message: 'Productos no encontrados' });
+            return;
+        }
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener los productos', error });
+    }
+}

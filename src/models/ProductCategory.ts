@@ -6,6 +6,10 @@ const ProductCategorySchema = new Schema<IProductCategory>({
         type: String,
         required: true
     },
+    image: {
+        type: String,
+        required: true
+    },
     routeLink: {
         type: String,
         required: true

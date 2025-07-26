@@ -37,8 +37,8 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
     try {
         const data: IProductCategoryRequest = req.body;
 
-        if (!data.name) {
-            res.status(400).json({ message: 'Name is required' });
+        if (!data.name ||!data.image) {
+            res.status(400).json({ message: 'Faltan campos obligatorios' });
             return;
         }
 

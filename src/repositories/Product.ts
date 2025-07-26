@@ -61,4 +61,20 @@ export class ProductRepository {
         }
     }
 
+    async getProductsWithDescuento() {
+        try {
+            return await ProductModel.find({ descuento: { $gt: 0 } }).populate('material', 'name').populate('category', 'name').populate('brand', 'name');
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async getNewProducts() {
+        try {
+            return await ProductModel.find({ isNew: true }).populate('material', 'name').populate('category', 'name').populate('brand', 'name');
+        } catch (error) {
+            throw error;
+        }
+    }
+
 }
