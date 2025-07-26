@@ -43,7 +43,6 @@ const OrderSchema = new Schema<IOrder>({
     status: {
         type: String,
         enum: ['pending', 'processing', 'completed', 'cancelled', 'payment_failed'],
-        default: 'pending'
     },
     paymentId: {
         type: String,
@@ -61,8 +60,6 @@ const OrderSchema = new Schema<IOrder>({
             'rejected',        // Pago rechazado
             'cancelled',       // Pago cancelado
             'refunded',        // Pago reembolsado
-            'charged_back',    // Contracargo
-            'partially_refunded' // Reembolso parcial
         ],
     },
     paymentMethod: {

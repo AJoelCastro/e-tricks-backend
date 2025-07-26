@@ -20,7 +20,7 @@ const client = new MercadoPagoConfig({
     }
 });
 
-const preference = new Preference(client);
+
 const payment = new Payment(client);
 
 const mapPaymentStatus = (status: string): string => {
@@ -37,55 +37,10 @@ const mapPaymentStatus = (status: string): string => {
     return statusMap[status] || 'pending';
 };
 
-const createMercadoPagoPreference = async (order: any, user: any) => {
-    const items = order.items.map((item: any) => ({
-        id: item.productId.toString(),
-        title: item.name,
-        description: `Talla: ${item.size}`,
-        quantity: item.quantity,
-        unit_price: item.price,
-    }));
-
-    if (order.discountAmount > 0) {
-        items.push({
-            title: `Descuento (Cupón: ${order.couponCode})`,
-            quantity: 1,
-            unit_price: -order.discountAmount
-        });
-    }
-
-    const preferenceData = {
-        items,
-        payer: {
-            name: user.name,
-            surname: user.lastName,
-            email: user.email,
-            phone: {
-                area_code: '51',
-                number: user.phone || '999999999'
-            }
-        },
-        external_reference: order._id.toString(),
-        notification_url: `${process.env.BACKEND_URL}/api/orders/webhook`,
-     /*   back_urls: {
-            success: `${process.env.FRONTEND_URL}/carrito/order/success`,
-            failure: `${process.env.FRONTEND_URL}/carrito/order/failure`,
-            pending: `${process.env.FRONTEND_URL}/carrito/order/pending`
-        },
-        auto_return: 'approved' as const, */
-        statement_descriptor: 'TRICKS'
-    };
-
-    const response = await preference.create({
-        body: preferenceData
-    });
-
-    return response;
-};
 
 export const createOrder = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { userId, addressId, couponCode } = req.body;
+        const { userId, addressId, couponCode, paymentData,userEmail } = req.body;
 
         if (!userId || !addressId) {
             res.status(400).json({
@@ -105,13 +60,10 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
             return;
         }
 
-
         let subtotalAmount = 0;
         const orderItems = await Promise.all(
             user.cart.map(async (item) => {
-               // const product = await productRepository.getById(item.productId.toString());
-
-               const product =  await ProductModel.findById(item.productId);
+                const product = await ProductModel.findById(item.productId);
                 if (!product) {
                     throw new Error(`Producto con ID ${item.productId} no encontrado`);
                 }
@@ -129,21 +81,20 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
             })
         );
 
-
         let orderData: any = {
             userId,
             items: orderItems,
             subtotalAmount,
             totalAmount: subtotalAmount,
             addressId,
-            paymentMethod: 'mercado_pago',
+            paymentMethod: paymentData?.paymentMethod || 'mercado_pago',
             status: 'pending',
             paymentStatus: 'pending'
         };
 
+        // Aplicar cupón si existe
         if (couponCode) {
             const coupon = await couponRepository.findValidCoupon(couponCode);
-
             if (coupon) {
                 const discountAmount = subtotalAmount * (coupon.discountPercentage / 100);
                 orderData.totalAmount = subtotalAmount - discountAmount;
@@ -154,27 +105,77 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
 
         const savedOrder = await orderRepository.createOrder(orderData);
 
-        const preferenceResponse = await createMercadoPagoPreference(savedOrder, user);
+        // Si se proporciona información de pago, procesarla
+        if (paymentData && paymentData.token) {
+            try {
+                // Procesar pago con MercadoPago
+                const paymentRequest = {
+                    transaction_amount: orderData.totalAmount,
+                    token: paymentData.token,
+                    description: `Orden #${savedOrder._id}`,
+                    installments: paymentData.installments || 1,
+                    payer: {
+                        email: userEmail,
+                        identification: {
+                            type: paymentData.payer.identification.type,
+                            number: paymentData.payer.identification.number
+                        }
+                    },
+                    external_reference: savedOrder.userId,
+                    notification_url: `${process.env.BACKEND_URL}/api/orders/webhook`,
+                    statement_descriptor: 'TRICKS'
+                };
 
-          console.log('paymentId',preferenceResponse.id)
+                const paymentResponse = await payment.create({
+                    body: paymentRequest
+                });
 
-        if (!preferenceResponse.id) {
-            throw new Error('No se pudo obtener el ID de la preferencia de MercadoPago');
-        }
-      
+                if (paymentResponse.id) {
+                    savedOrder.paymentId = paymentResponse.id.toString();
+                    savedOrder.paymentStatus = paymentResponse.status!;
+                    savedOrder.status = mapPaymentStatus(paymentResponse.status!);
+                    await savedOrder.save();
 
-        savedOrder.paymentId = preferenceResponse.id;
-        savedOrder.mercadoPagoPreferenceId = preferenceResponse.id;
-        await savedOrder.save();
+                    // Si el pago fue aprobado, marcar cupón como usado y limpiar carrito
+                    if (paymentResponse.status === 'approved') {
+                        if (savedOrder.couponCode) {
+                            await couponRepository.markCouponAsUsed(savedOrder.couponCode, savedOrder.userId);
+                        }
+                        await userRepository.clearUserCart(savedOrder.userId.toString());
+                    }
+                }
 
-        res.status(201).json({
-            success: true,
-            data: {
-                init_point: preferenceResponse.init_point,
-                sandbox_init_point: preferenceResponse.sandbox_init_point,
-                order: savedOrder
+                res.status(201).json({
+                    success: true,
+                    data: {
+                        order: savedOrder,
+                        payment: {
+                            id: paymentResponse.id,
+                            status: paymentResponse.status,
+                            status_detail: paymentResponse.status_detail
+                        }
+                    }
+                });
+
+            } catch (paymentError) {
+                console.error('Error procesando pago:', paymentError);
+                res.status(201).json({
+                    success: true,
+                    data: {
+                        order: savedOrder,
+                        payment_error: 'Error procesando el pago. La orden fue creada pero el pago falló.'
+                    }
+                });
             }
-        });
+        } else {
+            // Solo crear la orden sin procesar pago
+            res.status(201).json({
+                success: true,
+                data: {
+                    order: savedOrder
+                }
+            });
+        }
 
     } catch (error) {
         console.error('Error al crear orden en servidor:', error);
