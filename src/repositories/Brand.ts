@@ -89,6 +89,7 @@ export class BrandRepository {
                         categories: {
                             _id: 1,
                             name: 1, // o los campos que necesites de Category
+                            image: 1,
                             routeLink: 1
                         }
                     }
