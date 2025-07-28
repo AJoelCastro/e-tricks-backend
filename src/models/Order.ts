@@ -101,4 +101,39 @@ const OrderSchema = new Schema<IOrder>({
     versionKey: false
 });
 
+OrderSchema.pre('save', function (next) {
+    const order = this as IOrder;
+
+    let newItemStatus: string | null = null;
+
+    switch (order.status) {
+        case 'cancelled':
+            newItemStatus = 'cancelled';
+            break;
+        case 'completed':
+            if (order.deliveryStatus === 'delivered') {
+                newItemStatus = 'delivered';
+            }
+            break;
+        case 'processing':
+            if (order.deliveryStatus === 'shipped') {
+                newItemStatus = 'shipped';
+            }
+            break;
+    }
+
+    
+    if (newItemStatus) {
+        order.items = order.items.map(item => {
+            if (item.itemStatus !== 'refunded' && item.itemStatus !== 'returned') {
+                item.itemStatus = newItemStatus!;
+            }
+            return item;
+        });
+    }
+
+    next();
+});
+
+
 export const OrderModel = mongoose.model<IOrder>('Order', OrderSchema);
