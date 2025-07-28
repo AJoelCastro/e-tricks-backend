@@ -23,8 +23,26 @@ const OrderItemSchema = new Schema<IOrderItem>({
     size: {
         type: String,
         required: true
+    },
+    image: {
+        type: String,
+        require: true
+    },
+    itemStatus: {
+        type: String,
+        enum: [
+            'pending',       // Producto agregado a la orden, esperando procesamiento
+            'shipped',       // Ya fue enviado 
+            'delivered',     // Ya fue entregado
+            'cancelled',     // Producto cancelado dentro de la orden
+            'return_requested', // Cliente solicitó devolución
+            'returned',      // Producto fue devuelto
+            'refunded'       // Producto fue reembolsado
+        ],
+        default: 'pending'
     }
-}, { _id: false });
+
+}, { _id: true });
 
 const OrderSchema = new Schema<IOrder>({
     userId: {
@@ -43,6 +61,11 @@ const OrderSchema = new Schema<IOrder>({
     status: {
         type: String,
         enum: ['pending', 'processing', 'completed', 'cancelled', 'payment_failed'],
+    },
+    orderType: {
+        type: String,
+        enum: ['standard', 'pickup'],
+        required: true
     },
     paymentId: {
         type: String,
@@ -65,6 +88,11 @@ const OrderSchema = new Schema<IOrder>({
     paymentMethod: {
         type: String,
         required: true
+    },
+    deliveryStatus: {
+        type: String,
+        enum: ['pending', 'shipped', 'delivered', 'returned'],
+        default: 'pending'
     },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
