@@ -49,6 +49,11 @@ const OrderSchema = new Schema<IOrder>({
         type: String,
         required: true
     },
+    orderNumber: {
+        type: String,
+        unique: true,
+        required: true
+    },
     items: [OrderItemSchema],
     totalAmount: {
         type: Number,
@@ -122,7 +127,7 @@ OrderSchema.pre('save', function (next) {
             break;
     }
 
-    
+
     if (newItemStatus) {
         order.items = order.items.map(item => {
             if (item.itemStatus !== 'refunded' && item.itemStatus !== 'returned') {
@@ -133,6 +138,36 @@ OrderSchema.pre('save', function (next) {
     }
 
     next();
+});
+
+OrderSchema.pre('save', async function (next) {
+  const order = this as IOrder;
+
+  if (!order.orderNumber) {
+    let isUnique = false;
+    let attempts = 0;
+
+    while (!isUnique && attempts < 5) {
+      const date = new Date();
+      const ymd = `${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`;
+      const random = Math.floor(Math.random() * 1e7).toString().padStart(7, '0');
+      const generated = `${ymd}${random}`;
+
+      const exists = await mongoose.models.Order.findOne({ orderNumber: generated });
+      if (!exists) {
+        order.orderNumber = generated;
+        isUnique = true;
+      } else {
+        attempts++;
+      }
+    }
+
+    if (!isUnique) {
+      return next(new Error('Could not generate a unique order number. Try again.'));
+    }
+  }
+
+  next();
 });
 
 

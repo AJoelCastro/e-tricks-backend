@@ -12,6 +12,7 @@ export interface IOrderItem {
 
 export interface IOrder extends Document {
     userId: string;
+    orderNumber:string;
     items: IOrderItem[];
     subtotalAmount: number;
     totalAmount: number;
