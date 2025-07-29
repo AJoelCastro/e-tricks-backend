@@ -11,9 +11,10 @@ import categoryRoutes from './routes/Category';
 import materialRoutes from './routes/Material';
 import groupCategoryRoutes from './routes/GroupCategory';
 import subCategoryRoutes from './routes/SubCategory';
-import pickUpRoutes from './routes/PickUp'
-import orderRoutes from './routes/Order'
-import couponRoutes from './routes/Coupon'
+import pickUpRoutes from './routes/PickUp';
+import orderRoutes from './routes/Order';
+import couponRoutes from './routes/Coupon';
+import bannerPrincipalRoutes from  './routes/BannerPrincipal'
 
 dotenv.config();
 
@@ -50,6 +51,7 @@ app.use('/subCategory', subCategoryRoutes);
 app.use('/pickUp', pickUpRoutes);
 app.use('/order', orderRoutes);
 app.use('/coupon', couponRoutes);
+app.use('/bannerPrincipal', bannerPrincipalRoutes);
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
     res.status(200).json({ status: 'OK', message: 'Server is running' });
