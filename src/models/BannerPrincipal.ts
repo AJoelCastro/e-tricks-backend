@@ -11,6 +11,7 @@ const LinksSchema = new Schema<ILinksWithNames>(
 const BannerPrincipalSchema = new Schema<IBannerPrincipal>(
     {
         image: { type: String, required: true },
+        imageMobile: { type: String, required: true },
         links: { type: [LinksSchema], required: true },
         status: { type: Boolean, required: true },
     },

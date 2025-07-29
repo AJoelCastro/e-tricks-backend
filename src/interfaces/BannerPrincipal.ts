@@ -6,6 +6,7 @@ export interface ILinksWithNames {
 }
 export interface IBannerPrincipal extends Document {
     image: string;
+    imageMobile: string;
     links: ILinksWithNames[];
     status: boolean;
     createdAt: Date;
@@ -13,6 +14,7 @@ export interface IBannerPrincipal extends Document {
 }
 export interface IBannerPrincipalRequest {
     image: string;
+    imageMobile: string;
     links: ILinksWithNames[];
     status: boolean;
 }
