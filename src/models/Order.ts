@@ -52,7 +52,7 @@ const OrderSchema = new Schema<IOrder>({
     orderNumber: {
         type: String,
         unique: true,
-        required: true
+        auto: true,
     },
     items: [OrderItemSchema],
     totalAmount: {

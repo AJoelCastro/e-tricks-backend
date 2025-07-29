@@ -85,6 +85,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
             userId,
             items: orderItems,
             subtotalAmount,
+            orderType: 'pickup',
             totalAmount: subtotalAmount,
             addressId,
             paymentMethod: paymentData?.paymentMethod || 'mercado_pago',
