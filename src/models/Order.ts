@@ -54,7 +54,10 @@ const OrderSchema = new Schema<IOrder>({
         unique: true,
         auto: true,
     },
-    items: [OrderItemSchema],
+    items: {
+        type:[OrderItemSchema],
+        required: true
+    },
     totalAmount: {
         type: Number,
         required: true

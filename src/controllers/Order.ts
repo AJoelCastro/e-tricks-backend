@@ -76,7 +76,8 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
                     name: product.name,
                     price: product.price,
                     quantity: item.quantity,
-                    size: item.size
+                    size: item.size,
+                    image: product.images[0]
                 };
             })
         );
@@ -330,11 +331,8 @@ export const getUserOrders = async (req: Request, res: Response): Promise<void> 
     try {
         const orders = await orderRepository.getOrdersByUser(req.params.userId)
 
-        console.log("order controller", orders);
         res.json({ success: true, data: orders });
-
     } catch (error) {
-        console.error('Error obteniendo órdenes:', error);
         res.status(500).json({
             success: false,
             message: 'Error obteniendo órdenes'
