@@ -327,8 +327,9 @@ export const getOrderDetails = async (req: Request, res: Response): Promise<void
 
 export const getUserOrders = async (req: Request, res: Response): Promise<void> => {
     try {
-        const orders = orderRepository.getOrdersByUser(req.params.userId.toString())
+        const orders = await orderRepository.getOrdersByUser(req.params.userId)
 
+        console.log("order controller", orders);
         res.json({ success: true, data: orders });
 
     } catch (error) {

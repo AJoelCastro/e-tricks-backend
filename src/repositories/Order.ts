@@ -30,8 +30,8 @@ export class OrderRepository {
 
     async getOrdersByUser(userId: string) {
         try {
-            return await OrderModel.find({ userId })
-                .populate('items.productId')
+            return await OrderModel.find({ userId:userId })
+                .populate('items')
                 .sort({ createdAt: -1 })
                 .exec();
         } catch (error) {
