@@ -65,7 +65,10 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
             subtotalAmount += itemTotal;
 
             items.push({
+                id: product.id,
                 title: `${product.name} - Talla: ${item.size}`,
+                category_id:product.category,
+                description: product.description,
                 quantity: item.quantity ,
                 unit_price:  Number(product.price * (1 - product.descuento / 100)),
                 currency_id: "PEN"
@@ -95,14 +98,14 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
             items,
             // URLs de retorno para el checkout directo
             
-            back_urls: {
+        /*    back_urls: {
                 success: `${process.env.FRONTEND_URL}/carrito/order/success`,
                 failure: `${process.env.FRONTEND_URL}/carrito/order/failure`, 
                 pending: `${process.env.FRONTEND_URL}/carrito/order/pending`
             },
-            auto_return: "approved", 
+            auto_return: "approved",   */
             external_reference: userId, 
-            notification_url: `${process.env.BACKEND_URL}/api/orders/webhook`, // Webhook para notificaciones
+        //    notification_url: `${process.env.BACKEND_URL}/api/orders/webhook`, // Webhook para notificaciones
             statement_descriptor: "TRICKS", // Aparece en el estado de cuenta
             // Configuraciones adicionales
             expires: false, // La preferencia no expira
