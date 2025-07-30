@@ -18,8 +18,8 @@ router.get('/get', getProducts);
 router.get('/:id/get', getProductById);
 router.get('/:groupCategory/:subCategory/:prodCategory/products', getByIdGroupByIdSubByIdCategoryProduct);
 router.get('/:groupCategory/:subCategory/products', getByIdGroupByIdSubProduct);
-router.get('/:marcaCategory/products', getProductsByIdMarca);
-router.get('/:marcaCategory/:prodCategory/products', getProductsByIdMarcaAndIdCategoryProduct);
+router.get('/:marcaCategory/productsBrands', getProductsByIdMarca);
+router.get('/:marcaCategory/:prodCategory/productsBrands', getProductsByIdMarcaAndIdCategoryProduct);
 router.get('/getWithDescuento', getProductsWithDescuento);
 router.get('/getNewProducts', getNewProducts);
 
