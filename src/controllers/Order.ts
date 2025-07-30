@@ -118,9 +118,12 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
             },
             // Configuración de pago
             payment_methods: {
-                excluded_payment_methods: [], // No excluir ningún método
+                excluded_payment_methods: [
+                      { id: "ticket" }, // excluye pagos en efectivo (OXXO, PagoEfectivo, etc.)
+                      { id: "atm" },   
+                ], // No excluir ningún método
                 excluded_payment_types: [], // No excluir ningún tipo
-                installments: 12 // Máximo 12 cuotas
+                installments: 1 // Máximo 12 cuotas
             }
         };
 
