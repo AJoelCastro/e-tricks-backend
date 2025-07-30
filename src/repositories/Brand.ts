@@ -102,4 +102,121 @@ export class BrandRepository {
         }
     }
 
+    async getBrandsWithCategoryProductsWithProducts() {
+        try {
+            const result = await ProductModel.aggregate([
+                // Primer paso: agrupar productos por brand y category
+                {
+                    $group: {
+                        _id: {
+                            brand: "$brand",
+                            category: "$category"
+                        },
+                        products: {
+                            $push: {
+                                _id: "$_id",
+                                name: "$name",
+                                image: "$image",
+                                routeLink: "$routeLink",
+                                price: "$price",
+                                discountPrice: "$discountPrice",
+                                descuento: "$descuento"
+                            }
+                        }
+                    }
+                },
+                // Segundo paso: agrupar por brand y construir el array de categorías con sus productos
+                {
+                    $group: {
+                        _id: "$_id.brand",
+                        categories: {
+                            $push: {
+                                categoryId: "$_id.category",
+                                products: "$products"
+                            }
+                        }
+                    }
+                },
+                // Lookup para obtener información de la marca
+                {
+                    $lookup: {
+                        from: "brands",
+                        localField: "_id",
+                        foreignField: "_id",
+                        as: "brand"
+                    }
+                },
+                {
+                    $unwind: "$brand"
+                },
+                // Lookup para obtener información de las categorías
+                {
+                    $lookup: {
+                        from: "productcategories",
+                        localField: "categories.categoryId",
+                        foreignField: "_id",
+                        as: "categoryDetails"
+                    }
+                },
+                // Reestructurar para combinar la información de categorías con sus productos
+                {
+                    $addFields: {
+                        categories: {
+                            $map: {
+                                input: "$categories",
+                                as: "cat",
+                                in: {
+                                    $mergeObjects: [
+                                        {
+                                            $arrayElemAt: [
+                                                {
+                                                    $filter: {
+                                                        input: "$categoryDetails",
+                                                        cond: { $eq: ["$$this._id", "$$cat.categoryId"] }
+                                                    }
+                                                },
+                                                0
+                                            ]
+                                        },
+                                        { products: "$$cat.products" }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                // Proyección final
+                {
+                    $project: {
+                        _id: 0,
+                        brand: {
+                            _id: "$brand._id",
+                            name: "$brand.name",
+                            image: "$brand.image"
+                        },
+                        categories: {
+                            _id: 1,
+                            name: 1,
+                            image: 1,
+                            routeLink: 1,
+                            products: {
+                                _id: 1,
+                                name: 1,
+                                image: 1,
+                                routeLink: 1,
+                                price: 1,
+                                discountPrice: 1,
+                                descuento: 1
+                            }
+                        }
+                    }
+                }
+            ]);
+
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
+
 }
