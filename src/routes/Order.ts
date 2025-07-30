@@ -7,6 +7,7 @@ import {
     getUserOrders,
     cancelOrder,
     handleWebhook,
+    createPreference
 
 } from "../controllers/Order";
 const authenticateClerkToken = require('../middleware/auth');
@@ -28,6 +29,8 @@ router.get('/user/:userId', authenticateClerkToken, getUserOrders );
 // Cancelar una orden
 router.delete('/:orderId', authenticateClerkToken, cancelOrder );
 
+// Obtener preferenceId desde MercadoPago
+router.post('/checkout/preference', authenticateClerkToken, createPreference);
 
 router.post('/webhook',
     bodyParser.raw({ type: 'application/json' }),

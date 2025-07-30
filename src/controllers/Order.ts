@@ -37,6 +37,125 @@ const mapPaymentStatus = (status: string): string => {
     return statusMap[status] || 'pending';
 };
 
+export const createPreference = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { userId, couponCode,total,subtotal } = req.body;
+
+        // Validar que el usuario exista y tenga items en el carrito
+        const user = await userRepository.getUserWithCart(userId);
+        if (!user?.cart?.length) {
+            res.status(400).json({
+                success: false,
+                message: 'El carrito está vacío'
+            });
+            return;
+        }
+
+        let subtotalAmount = 0;
+        const items: any[] = [];
+
+        // Procesar items del carrito
+        for (const item of user.cart) {
+            const product = await ProductModel.findById(item.productId);
+            if (!product) {
+                throw new Error(`Producto con ID ${item.productId} no encontrado`);
+            }
+
+            const itemTotal = product.price * item.quantity;
+            subtotalAmount += itemTotal;
+
+            items.push({
+                title: `${product.name} - Talla: ${item.size}`,
+                quantity: item.quantity ,
+                unit_price:  Number(product.price * (1 - product.descuento / 100)),
+                currency_id: "PEN"
+            });
+        }
+
+        // Aplicar descuento por cupón si existe
+       /* let finalTotal = subtotalAmount;
+        if (couponCode) {
+            const coupon = await couponRepository.findValidCoupon(couponCode);
+            if (coupon) {
+                const discountAmount = subtotalAmount * (coupon.discountPercentage / 100);
+                finalTotal = subtotalAmount - discountAmount;
+
+                // Agregar item de descuento
+                items.push({
+                    title: `Descuento (${coupon.code}) - ${coupon.discountPercentage}%`,
+                    quantity: 1,
+                    unit_price: -Number(discountAmount.toFixed(2)),
+                    currency_id: 'PEN'
+                });
+            }
+        } */
+        console.log(`${process.env.FRONTEND_URL}/carrito/order/success`)
+        // Configuración de la preferencia para checkout directo
+        const body = {
+            items,
+            // URLs de retorno para el checkout directo
+            
+            back_urls: {
+                success: `${process.env.FRONTEND_URL}/carrito/order/success`,
+                failure: `${process.env.FRONTEND_URL}/carrito/order/failure`, 
+                pending: `${process.env.FRONTEND_URL}/carrito/order/pending`
+            },
+            auto_return: "approved", 
+            external_reference: userId, 
+            notification_url: `${process.env.BACKEND_URL}/api/orders/webhook`, // Webhook para notificaciones
+            statement_descriptor: "TRICKS", // Aparece en el estado de cuenta
+            // Configuraciones adicionales
+            expires: false, // La preferencia no expira
+            binary_mode: false, // Permite pagos pendientes
+            // Metadata para tracking interno
+            metadata: {
+                user_id: userId,
+                coupon_code: couponCode || null,
+                total_items: user.cart.length,
+                subtotal: subtotal.toFixed(2),
+                final_total:total.toFixed(2),
+                created_at: new Date().toISOString()
+            },
+            // Configuración de pago
+            payment_methods: {
+                excluded_payment_methods: [], // No excluir ningún método
+                excluded_payment_types: [], // No excluir ningún tipo
+                installments: 12 // Máximo 12 cuotas
+            }
+        };
+
+        console.log('Creating preference with body:', JSON.stringify(body, null, 2));
+
+        const preference = new Preference(client);
+        const result = await preference.create({ body });
+
+        console.log('Preference created successfully:',result);
+
+        res.json({
+            success: true,
+            preferenceId: result.id,
+            init_point: result.init_point,
+            sandbox_init_point: result.sandbox_init_point
+        });
+
+    } catch (error: any) {
+        console.error("Error al crear preferencia:", error);
+        
+        // Log más detallado del error
+        if (error.cause) {
+            console.error("Error cause:", error.cause);
+        }
+        if (error.response) {
+            console.error("Error response:", error.response.data);
+        }
+        
+        res.status(500).json({
+            success: false,
+            message: "Error al crear la preferencia de pago",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
 
 export const createOrder = async (req: Request, res: Response): Promise<void> => {
     try {
