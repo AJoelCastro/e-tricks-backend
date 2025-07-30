@@ -6,7 +6,9 @@ import {
     getByIdGroupByIdSubByIdCategoryProduct,
     getByIdGroupByIdSubProduct,
     getProductsWithDescuento,
-    getNewProducts
+    getNewProducts,
+    getProductsByIdMarca,
+    getProductsByIdMarcaAndIdCategoryProduct
 } from '../controllers/Product';
 const authenticateClerkToken = require('../middleware/auth');
 
@@ -16,6 +18,8 @@ router.get('/get', getProducts);
 router.get('/:id/get', getProductById);
 router.get('/:groupCategory/:subCategory/:prodCategory/products', getByIdGroupByIdSubByIdCategoryProduct);
 router.get('/:groupCategory/:subCategory/products', getByIdGroupByIdSubProduct);
+router.get('/:marcaCategory/products', getProductsByIdMarca);
+router.get('/:marcaCategory/:prodCategory/products', getProductsByIdMarcaAndIdCategoryProduct);
 router.get('/getWithDescuento', getProductsWithDescuento);
 router.get('/getNewProducts', getNewProducts);
 

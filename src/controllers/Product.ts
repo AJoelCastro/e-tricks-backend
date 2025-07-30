@@ -116,6 +116,35 @@ export const getByIdGroupByIdSubProduct = async (req: Request, res: Response): P
     }
 }
 
+export const getProductsByIdMarca = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const marca = req.params.marcaCategory;
+        const products = await productRepository.getProductsByIdMarca(marca);
+        if (!products) {
+            res.status(404).json({ message: 'Productos no encontrados' });
+            return;
+        }
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener los productos', error });
+    }
+}
+
+export const getProductsByIdMarcaAndIdCategoryProduct = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const marca = req.params.marcaCategory;
+        const prodCategory = req.params.prodCategory;
+        const products = await productRepository.getProductsByIdMarcaAndIdCategoryProduct(marca, prodCategory);
+        if (!products) {
+            res.status(404).json({ message: 'Productos no encontrados' });
+            return;
+        }
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener los productos', error });
+    }
+}
+
 export const getProductsWithDescuento = async (req: Request, res: Response): Promise<void> => {
     try {
         const products = await productRepository.getProductsWithDescuento();

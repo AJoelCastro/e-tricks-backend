@@ -61,6 +61,22 @@ export class ProductRepository {
         }
     }
 
+    async getProductsByIdMarcaAndIdCategoryProduct(idMarca: string, idCategory: string) {
+        try {
+            return await ProductModel.find({ brand: idMarca, category: idCategory }).populate('material', 'name').populate('category', 'name').populate('brand', 'name');
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async getProductsByIdMarca(idMarca: string) {
+        try {
+            return await ProductModel.find({ brand: idMarca }).populate('material', 'name').populate('category', 'name').populate('brand', 'name');
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async getProductsWithDescuento() {
         try {
             return await ProductModel.find({ descuento: { $gt: 0 } }).populate('material', 'name').populate('category', 'name').populate('brand', 'name');
