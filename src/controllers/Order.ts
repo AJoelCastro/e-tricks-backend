@@ -39,9 +39,9 @@ const mapPaymentStatus = (status: string): string => {
 
 export const createPreference = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { userId, couponCode,total,subtotal } = req.body;
+        const { userId, couponCode,addressId,  orderType } = req.body;
 
-        // Validar que el usuario exista y tenga items en el carrito
+        // 1. VALIDAR QUE EL USUARIO EXISTA Y TENGA ITEMS EN EL CARRITO
         const user = await userRepository.getUserWithCart(userId);
         if (!user?.cart?.length) {
             res.status(400).json({
@@ -51,39 +51,83 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
             return;
         }
 
+        // 2. PROCESAR ITEMS DEL CARRITO Y CREAR ORDEN
         let subtotalAmount = 0;
         const items: any[] = [];
+        const orderItems: any[] = [];
 
-        // Procesar items del carrito
         for (const item of user.cart) {
             const product = await ProductModel.findById(item.productId);
             if (!product) {
                 throw new Error(`Producto con ID ${item.productId} no encontrado`);
             }
 
-            const itemTotal = product.price * item.quantity;
+            // Verificar stock disponible antes de crear la orden
+         /*   const tallaEncontrada = product.stockPorTalla.find(
+                (s) => s.talla === item.size
+            );
+
+            if (!tallaEncontrada || tallaEncontrada.stock < item.quantity) {
+                res.status(400).json({
+                    success: false,
+                    message: `Stock insuficiente para ${product.name} en talla ${item.size}. Disponible: ${tallaEncontrada?.stock || 0}, Solicitado: ${item.quantity}`
+                });
+                return;
+            } */
+
+            const discountedPrice = product.price * (1 - (product.descuento || 0) / 100);
+            const itemTotal = discountedPrice * item.quantity;
             subtotalAmount += itemTotal;
 
+            // Para MercadoPago
             items.push({
                 id: product.id,
                 title: `${product.name} - Talla: ${item.size}`,
-                category_id:product.category,
+                category_id: product.category,
                 description: product.description,
-                quantity: item.quantity ,
-                unit_price:  Number(product.price * (1 - product.descuento / 100)),
+                quantity: item.quantity,
+                unit_price: Number(discountedPrice),
                 currency_id: "PEN"
+            });
+
+            // Para la orden
+            orderItems.push({
+                productId: product._id,
+                name: product.name,
+                price: product.price,
+                quantity: item.quantity,
+                size: item.size,
+                image: product.images[0],
+                itemStatus: 'pending'
             });
         }
 
-        // Aplicar descuento por cupón si existe
-       /* let finalTotal = subtotalAmount;
+        // 3. CREAR LA ORDEN PRIMERO
+        let orderData: any = {
+            userId,
+            items: orderItems,
+            totalAmount: subtotalAmount,
+            addressId: addressId, // Se actualizará desde el frontend
+            status: 'pending',
+            paymentStatus: 'pending',
+            paymentMethod: 'mercado_pago',
+            orderType:  orderType,
+            createdAt: new Date()
+        };
+
+        // 4. APLICAR CUPÓN SI EXISTE
+        let finalTotal = subtotalAmount;
         if (couponCode) {
             const coupon = await couponRepository.findValidCoupon(couponCode);
             if (coupon) {
                 const discountAmount = subtotalAmount * (coupon.discountPercentage / 100);
                 finalTotal = subtotalAmount - discountAmount;
 
-                // Agregar item de descuento
+                orderData.discountAmount = discountAmount;
+                orderData.couponCode = coupon.code;
+                orderData.totalAmount = finalTotal;
+
+                // Agregar item de descuento para MercadoPago
                 items.push({
                     title: `Descuento (${coupon.code}) - ${coupon.discountPercentage}%`,
                     quantity: 1,
@@ -91,42 +135,56 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
                     currency_id: 'PEN'
                 });
             }
-        } */
-        console.log(`${process.env.FRONTEND_URL}/carrito/order/success`)
-        // Configuración de la preferencia para checkout directo
+        }
+
+        // 5. GUARDAR LA ORDEN EN BD
+        const savedOrder = await orderRepository.createOrder(orderData);
+        console.log('✅ Orden creada:', savedOrder._id);
+
+        // 6. RESERVAR STOCK (IMPORTANTE)
+        for (const item of user.cart) {
+            await ProductModel.findByIdAndUpdate(
+                item.productId,
+                {
+                    $inc: {
+                        stock: -item.quantity,
+                        reservedStock: item.quantity
+                    }
+                }
+            );
+        }
+        console.log('📦 Stock reservado para orden:', savedOrder._id);
+
+        // 7. CREAR PREFERENCIA DE MERCADOPAGO
         const body = {
             items,
-            // URLs de retorno para el checkout directo
-            
-           back_urls: {
-                success: `${process.env.FRONTEND_URL}/carrito/order/success`,
-                failure: `${process.env.FRONTEND_URL}/carrito/order/failure`, 
-                pending: `${process.env.FRONTEND_URL}/carrito/order/pending`
-            },
-            auto_return: "approved",    
-            external_reference: userId, 
-       //     notification_url: `${process.env.BACKEND_URL}/api/orders/webhook`, // Webhook para notificaciones
-            statement_descriptor: "TRICKS", // Aparece en el estado de cuenta
-            // Configuraciones adicionales
-            expires: false, // La preferencia no expira
-            binary_mode: false, // Permite pagos pendientes
-            // Metadata para tracking interno
+        /*    back_urls: {
+                success: `${process.env.FRONTEND_URL}/order/success?orderId=${savedOrder._id}`,
+                failure: `${process.env.FRONTEND_URL}/order/failure?orderId=${savedOrder._id}`,
+                pending: `${process.env.FRONTEND_URL}/order/pending?orderId=${savedOrder._id}`
+            },  */
+        //    auto_return: "approved",
+            external_reference: savedOrder._id, 
+         //   notification_url: `${process.env.BACKEND_URL}/order/webhook`,
+            statement_descriptor: "TRICKS",
+            expires: false,
+            binary_mode: false,
             metadata: {
+                order_id: savedOrder._id,
                 user_id: userId,
                 coupon_code: couponCode || null,
                 total_items: user.cart.length,
-                subtotal: subtotal.toFixed(2),
-                final_total:total.toFixed(2),
+                subtotal: subtotalAmount.toFixed(2),
+                final_total: finalTotal.toFixed(2),
                 created_at: new Date().toISOString()
             },
-            // Configuración de pago
             payment_methods: {
                 excluded_payment_methods: [
-                      { id: "ticket" }, // excluye pagos en efectivo (OXXO, PagoEfectivo, etc.)
-                      { id: "atm" },   
-                ], // No excluir ningún método
-                excluded_payment_types: [], // No excluir ningún tipo
-                installments: 1 // Máximo 12 cuotas
+                    { id: "ticket" },
+                    { id: "atm" }
+                ],
+                excluded_payment_types: [],
+                installments: 1
             }
         };
 
@@ -135,31 +193,217 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
         const preference = new Preference(client);
         const result = await preference.create({ body });
 
-        console.log('Preference created successfully:',result);
+        // 8. ACTUALIZAR ORDEN CON PREFERENCE ID
+        await OrderModel.findByIdAndUpdate(savedOrder._id, {
+            preferenceId: result.id,
+            preferenceCreatedAt: new Date()
+        });
+
+        console.log('✅ Preferencia creada:', result.id);
 
         res.json({
             success: true,
-            preferenceId: result.id,
-            init_point: result.init_point,
-            sandbox_init_point: result.sandbox_init_point
+            data: {
+                orderId: savedOrder._id,
+                preferenceId: result.id,
+                init_point: result.init_point,
+                sandbox_init_point: result.sandbox_init_point
+            }
         });
 
     } catch (error: any) {
-        console.error("Error al crear preferencia:", error);
-        
-        // Log más detallado del error
-        if (error.cause) {
-            console.error("Error cause:", error.cause);
-        }
-        if (error.response) {
-            console.error("Error response:", error.response.data);
-        }
-        
+        console.error("❌ Error al crear preferencia:", error);
+
+        // En caso de error, liberar cualquier stock que se haya reservado
+        // (implementar rollback si es necesario)
+
         res.status(500).json({
             success: false,
             message: "Error al crear la preferencia de pago",
             error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
+    }
+};
+
+// ==========================================
+// WEBHOOK MODIFICADO PARA USAR orderId
+// ==========================================
+
+export const handleWebhook = async (req: Request, res: Response): Promise<void> => {
+    try {
+        console.log('🔔 Webhook recibido:', {
+            query: req.query,
+            body: req.body
+        });
+
+        const { topic, id } = req.query;
+
+        if (topic === 'payment') {
+            console.log('💳 Procesando notificación de pago:', id);
+
+            const paymentResponse = await payment.get({
+                id: id as string
+            });
+
+            const paymentData = paymentResponse;
+
+            if (!paymentData.id) {
+                console.error('❌ ID de pago no encontrado en la respuesta');
+                res.status(400).json({
+                    success: false,
+                    message: 'ID de pago no válido'
+                });
+                return;
+            }
+
+            // 👈 CLAVE: Buscar orden por external_reference (orderId)
+            const orderId = paymentData.external_reference;
+            if (!orderId) {
+                console.error('❌ No se encontró external_reference (orderId) en el pago');
+                res.status(400).json({
+                    success: false,
+                    message: 'OrderId no encontrado en external_reference'
+                });
+                return;
+            }
+
+            console.log(`🔍 Buscando orden con ID: ${orderId}`);
+
+            // Buscar la orden por su ID
+            const existingOrder = await OrderModel.findById(orderId);
+            if (!existingOrder) {
+                console.error(`❌ Orden no encontrada: ${orderId}`);
+                res.status(404).json({
+                    success: false,
+                    message: 'Orden no encontrada'
+                });
+                return;
+            }
+
+            // Verificar si ya se procesó este pago (idempotencia)
+            if (existingOrder.paymentId === paymentData.id.toString()) {
+                console.log(`⚠️ Pago ya procesado para orden ${orderId}`);
+                res.status(200).json({
+                    success: true,
+                    message: 'Pago ya procesado anteriormente'
+                });
+                return;
+            }
+
+            // Actualizar la orden con información del pago
+            const updatedOrder = await OrderModel.findByIdAndUpdate(
+                orderId,
+                {
+                    paymentId: paymentData.id.toString(),
+                    paymentStatus: paymentData.status,
+                    status: mapPaymentStatus(paymentData.status!),
+                    paymentDetails: {
+                        status_detail: paymentData.status_detail,
+                        transaction_amount: paymentData.transaction_amount,
+                        currency_id: paymentData.currency_id,
+                        payment_method_id: paymentData.payment_method_id,
+                        processed_at: new Date()
+                    },
+                    updatedAt: new Date()
+                },
+                { new: true }
+            );
+
+            console.log(`✅ Orden actualizada: ${orderId} - Estado: ${paymentData.status}`);
+
+            // Acciones según el estado del pago
+            if (paymentData.status === 'approved') {
+                await handleApprovedPayment(updatedOrder!);
+            } else if (paymentData.status === 'rejected' || paymentData.status === 'cancelled') {
+                await handleRejectedPayment(updatedOrder!);
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Webhook procesado correctamente'
+        });
+
+    } catch (error) {
+        console.error('❌ Error en webhook:', error);
+        res.status(200).json({ // Siempre responder 200 a MercadoPago
+            success: false,
+            message: 'Error procesando webhook'
+        });
+    }
+};
+
+// ==========================================
+// FUNCIONES AUXILIARES
+// ==========================================
+
+const handleApprovedPayment = async (order: any) => {
+    try {
+        console.log(`✅ Procesando pago aprobado para orden: ${order._id}`);
+
+        // 1. Confirmar stock (de reservado a vendido)
+        for (const item of order.items) {
+            await ProductModel.findByIdAndUpdate(
+                item.productId,
+                {
+                    $inc: {
+                        reservedStock: -item.quantity,
+                        soldStock: item.quantity
+                    }
+                }
+            );
+        }
+
+        // 2. Marcar cupón como usado
+        if (order.couponCode) {
+            await couponRepository.markCouponAsUsed(order.couponCode, order.userId);
+            console.log(`🎫 Cupón marcado como usado: ${order.couponCode}`);
+        }
+
+        // 3. Limpiar carrito del usuario
+        await userRepository.clearUserCart(order.userId.toString());
+        console.log(`🛒 Carrito limpiado para usuario: ${order.userId}`);
+
+        // 4. Actualizar estado final
+        await OrderModel.findByIdAndUpdate(order._id, {
+            status: 'processing', // Cambiar de 'pending' a 'processing'
+            confirmedAt: new Date()
+        });
+
+        console.log(`🎉 Pago procesado exitosamente para orden: ${order._id}`);
+
+    } catch (error) {
+        console.error('❌ Error procesando pago aprobado:', error);
+    }
+};
+
+const handleRejectedPayment = async (order: any) => {
+    try {
+        console.log(`❌ Procesando pago rechazado para orden: ${order._id}`);
+
+        // 1. Liberar stock reservado
+        for (const item of order.items) {
+            await ProductModel.findByIdAndUpdate(
+                item.productId,
+                {
+                    $inc: {
+                        stock: item.quantity,
+                        reservedStock: -item.quantity
+                    }
+                }
+            );
+        }
+
+        // 2. Actualizar estado
+        await OrderModel.findByIdAndUpdate(order._id, {
+            status: 'payment_failed',
+            failedAt: new Date()
+        });
+
+        console.log(`📦 Stock liberado para orden rechazada: ${order._id}`);
+
+    } catch (error) {
+        console.error('❌ Error procesando pago rechazado:', error);
     }
 };
 
@@ -314,55 +558,8 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     }
 };
 
-export const handleWebhook = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const { topic, id } = req.query;
-
-        if (topic === 'payment') {
-
-            const paymentResponse = await payment.get({
-                id: id as string
-            });
-
-            const paymentData = paymentResponse;
 
 
-            if (!paymentData.id) {
-                console.error('ID de pago no encontrado en la respuesta');
-                res.status(400).json({
-                    success: false,
-                    message: 'ID de pago no válido'
-                });
-                return;
-            }
-
-            const updatedOrder = await OrderModel.findOneAndUpdate(
-                { paymentId: paymentData.id.toString() },
-                {
-                    paymentStatus: paymentData.status,
-                    status: mapPaymentStatus(paymentData.status!),
-                    mercadoPagoMerchantOrderId: paymentData.order?.id
-                },
-                { new: true }
-            );
-
-            if (paymentData.status === 'approved' && updatedOrder?.couponCode) {
-                await couponRepository.markCouponAsUsed(updatedOrder.couponCode, updatedOrder.userId,);
-
-                await userRepository.clearUserCart(updatedOrder.userId.toString());
-            }
-        }
-
-        res.status(200).json({ received: true });
-
-    } catch (error) {
-        console.error('Error en webhook:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error procesando webhook'
-        });
-    }
-};
 
 export const confirmOrderPayment = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -428,6 +625,7 @@ export const confirmOrderPayment = async (req: Request, res: Response): Promise<
         });
     }
 };
+
 
 export const getOrderDetails = async (req: Request, res: Response): Promise<void> => {
     try {

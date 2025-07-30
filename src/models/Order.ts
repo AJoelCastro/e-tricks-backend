@@ -21,7 +21,7 @@ const OrderItemSchema = new Schema<IOrderItem>({
         min: 1
     },
     size: {
-        type: String,
+        type: Number,
         required: true
     },
     image: {
@@ -95,12 +95,52 @@ const OrderSchema = new Schema<IOrder>({
     },
     paymentMethod: {
         type: String,
-        required: true
+        required: false
+    },
+    preferenceId: {
+        type: String,
+        required: false
+    },
+    preferenceCreatedAt: {
+        type: Date,
+        required: false
+    },
+    paymentDetails: {
+        status_detail: String,
+        transaction_amount: Number,
+        currency_id: String,
+        payment_method_id: String,
+        payment_type_id: String,
+        processed_at: Date
+    },
+    confirmedAt: {
+        type: Date,
+        required: false
+    },
+    failedAt: {
+        type: Date,
+        required: false
     },
     deliveryStatus: {
         type: String,
         enum: ['pending', 'shipped', 'delivered', 'returned'],
         default: 'pending'
+    },
+     metadata: {
+        stockReserved: {
+            type: Boolean,
+            default: false
+        },
+        reservedAt: Date,
+        stockConfirmed: {
+            type: Boolean,
+            default: false
+        },
+        confirmedAt: Date,
+        paymentConfirmed: {
+            type: Boolean,
+            default: false
+        }
     },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
@@ -108,6 +148,11 @@ const OrderSchema = new Schema<IOrder>({
     timestamps: true,
     versionKey: false
 });
+
+OrderSchema.index({ userId: 1, createdAt: -1 });
+OrderSchema.index({ paymentId: 1 });
+OrderSchema.index({ status: 1 });
+OrderSchema.index({ paymentStatus: 1 });
 
 OrderSchema.pre('save', function (next) {
     const order = this as IOrder;
