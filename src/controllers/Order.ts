@@ -158,12 +158,12 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
         // 7. CREAR PREFERENCIA DE MERCADOPAGO
         const body = {
             items,
-        /*    back_urls: {
+            back_urls: {
                 success: `${process.env.FRONTEND_URL}/order/success?orderId=${savedOrder._id}`,
                 failure: `${process.env.FRONTEND_URL}/order/failure?orderId=${savedOrder._id}`,
                 pending: `${process.env.FRONTEND_URL}/order/pending?orderId=${savedOrder._id}`
-            },  */
-        //    auto_return: "approved",
+            },  
+            auto_return: "approved",
             external_reference: savedOrder._id, 
          //   notification_url: `${process.env.BACKEND_URL}/order/webhook`,
             statement_descriptor: "TRICKS",
