@@ -165,7 +165,7 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
             },  
             auto_return: "approved",
             external_reference: savedOrder._id, 
-         //   notification_url: `${process.env.BACKEND_URL}/order/webhook`,
+            notification_url: `${process.env.BACKEND_URL}/order/webhook`,
             statement_descriptor: "TRICKS",
             expires: false,
             binary_mode: false,
