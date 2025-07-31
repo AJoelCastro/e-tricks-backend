@@ -32,7 +32,17 @@ export const getCategoryById = async (req: Request, res: Response): Promise<void
     }
 };
 
-
+export const getAllWithDescuento = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const categories = await categoryRepository.getAllWithDescuento();
+        res.status(200).json(categories);
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'Error fetching categories', 
+            error: error instanceof Error ? error.message : error 
+        });
+    }
+}
 export const createCategory = async (req: Request, res: Response): Promise<void> => {
     try {
         const data: IProductCategoryRequest = req.body;

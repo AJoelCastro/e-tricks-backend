@@ -44,7 +44,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/product', productRoutes);
 app.use('/user', userRoutes)
 app.use('/brand', brandRoutes);
-app.use('/category', categoryRoutes);
+app.use('/product-category', categoryRoutes);
 app.use('/material', materialRoutes);
 app.use('/groupCategory', groupCategoryRoutes);
 app.use('/subCategory', subCategoryRoutes);
