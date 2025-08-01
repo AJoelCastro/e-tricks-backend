@@ -1,5 +1,6 @@
 import { IProductRequest } from "../interfaces/Product";
 import { ProductModel } from "../models/Product";
+import { UserModel } from "../models/User";
 
 export class ProductRepository {
     async getAll(){
@@ -9,13 +10,45 @@ export class ProductRepository {
             throw error;
         }
     }
-    async getById(id:string){
+
+    async getById(id: string) {
         try {
-            return await ProductModel.findById(id).populate('material', 'name').populate('category', 'name').populate('brand', 'name');
+            const product = await ProductModel.findById(id)
+                .populate('material', 'name')
+                .populate('category', 'name')
+                .populate('brand', 'name')
+                .lean();
+
+            if (!product) return null;
+
+            if (product.resenias?.length) {
+                // 1️⃣ Extraer todos los userId únicos de las reseñas
+                const userIds = [...new Set(product.resenias.map((r: any) => r.userId))];
+
+                // 2️⃣ Buscar todos los usuarios de una sola vez
+                const users = await UserModel.find(
+                    { userId: { $in: userIds } },
+                    { userId: 1, 'personalInfo.name': 1 }
+                ).lean();
+
+                // Convertir el array de usuarios en un mapa para búsqueda rápida
+                const userMap = new Map(users.map(u => [u.userId, u]));
+
+                // 3️⃣ Asignar el nombre del usuario a cada reseña
+                product.resenias = product.resenias.map((resenia: any) => ({
+                    ...resenia,
+                    user: userMap.has(resenia.userId)
+                        ? { name: userMap.get(resenia.userId)?.personalInfo?.name || '' }
+                        : null
+                }));
+            }
+
+            return product;
         } catch (error) {
             throw error;
         }
     }
+
     async create(product:IProductRequest){
         try {
             return await ProductModel.create(product);

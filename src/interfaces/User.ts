@@ -14,9 +14,9 @@ export interface IUser extends Document{
     addresses: IAddress[];
     cart: ICartItem[]
     billing?: {
-    customer_id: string;
-    cards: ICard[];
-  };
+      customer_id: string;
+      cards: ICard[];
+    };
     personalInfo:{
       name?:string,
       lastname?:string,

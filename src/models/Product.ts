@@ -7,7 +7,7 @@ const reseniaSchema = new Schema(
     valoracion: { type: Number, required: true },
     comentario: { type: String, required: true }
   },
-  { _id: false }
+  { _id: true }
 );
 const stockPorTallaSchema = new Schema(
   {
