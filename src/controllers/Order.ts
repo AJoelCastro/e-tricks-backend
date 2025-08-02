@@ -5,7 +5,8 @@ import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import { OrderModel } from "../models/Order";
 import { UserRepository } from "../repositories/User";
 import { ProductModel } from '../models/Product';
-
+import { MessageRepository } from '../repositories/Message';
+const messageRepo = new MessageRepository();
 const userRepository = new UserRepository();
 const orderRepository = new OrderRepository();
 const couponRepository = new CouponRepository();
@@ -145,7 +146,7 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
                 failure: `${process.env.FRONTEND_URL}/order/failure?oNum=${orderNumber}`,
                 pending: `${process.env.FRONTEND_URL}/order/pending?oNum=${orderNumber}`
             },
-            auto_return: "approved",  
+            auto_return: "approved",   
             external_reference: orderNumber,
             notification_url: `${process.env.BACKEND_URL}/order/webhook`,
             statement_descriptor: "TRICKS",
@@ -166,7 +167,7 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
 
         const preference = new Preference(client);
         const result = await preference.create({ body });
-
+        console.log("preference",preference)
         res.json({
             success: true,
             data: {
@@ -190,8 +191,13 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
 // ==========================================
 
 export const handleWebhook = async (req: Request, res: Response): Promise<void> => {
-    try {
+      try {
         const { topic, id } = req.query;
+        
+        // Log webhook received
+        await messageRepo.createMessage({
+            message: `Webhook received - topic: ${topic}, id: ${id}`
+        });
 
         if (topic === 'payment') {
             const paymentResponse = await payment.get({ id: id as string });
@@ -199,35 +205,68 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
 
             const orderNumber = paymentData.external_reference;
             if (!orderNumber) {
-                res.status(400).json({ success: false, message: 'OrderNumber no encontrado' });
+                const errorMessage = 'OrderNumber no encontrado en el webhook de pago';
+                await messageRepo.createMessage({
+                    message: errorMessage,
+                    fullError: { paymentData }
+                });
+                res.status(400).json({ success: false, message: errorMessage });
                 return;
             }
+
+            // Log payment metadata
+            await messageRepo.createMessage({
+                message: `Payment metadata received for order ${orderNumber}`,
+                fullError: { metadata: paymentData.metadata }
+            });
 
             // Verificar idempotencia
             const existingOrder = await OrderModel.findOne({ orderNumber });
             if (existingOrder) {
+                await messageRepo.createMessage({
+                    message: `Orden ya procesada anteriormente: ${orderNumber}`
+                });
                 res.status(200).json({ success: true, message: 'Orden ya procesada' });
                 return;
             }
 
             if (paymentData.status === 'approved') {
-                // Obtener preferencia para acceder a metadata
-
                 const metadata = paymentData.metadata;
                 if (!metadata) {
-                    throw new Error('Metadata no encontrada');
+                    const errorMessage = 'Metadata no encontrada en el pago aprobado';
+                    await messageRepo.createMessage({
+                        message: errorMessage,
+                        fullError: { paymentData }
+                    });
+                    throw new Error(errorMessage);
                 }
 
                 await createOrderFromMetadata(paymentData, metadata);
-                console.log(`✅ Orden creada con recálculo seguro: ${orderNumber}`);
+                await messageRepo.createMessage({
+                    message: `✅ Orden creada con recálculo seguro: ${orderNumber}`
+                });
             }
         }
 
         res.status(200).json({ success: true });
 
     } catch (error) {
-        console.error('Error en webhook:', error);
-        res.status(200).json({ success: false });
+        const errorMessage = `Error en webhook: ${error instanceof Error ? error.message : 'Unknown error'}`;
+        console.error(errorMessage, error);
+        
+        await messageRepo.createMessage({
+            message: errorMessage,
+            fullError: error instanceof Error ? {
+                name: error.name,
+                message: error.message,
+                stack: error.stack
+            } : error
+        });
+
+        res.status(500).json({ 
+            success: false,
+            message: 'Error interno del servidor al procesar el webhook' 
+        });
     }
 };
 
