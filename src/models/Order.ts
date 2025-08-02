@@ -52,7 +52,6 @@ const OrderSchema = new Schema<IOrder>({
     orderNumber: {
         type: String,
         unique: true,
-        auto: true,
     },
     items: {
         type:[OrderItemSchema],
@@ -77,8 +76,8 @@ const OrderSchema = new Schema<IOrder>({
     },
     paymentId: {
         type: String,
-        required: false,
-        default: 'xxxxx'
+        required: true,
+        default: null
     },
     paymentStatus: {
         type: String,
@@ -99,7 +98,7 @@ const OrderSchema = new Schema<IOrder>({
     },
     preferenceId: {
         type: String,
-        required: false
+        required: true
     },
     preferenceCreatedAt: {
         type: Date,

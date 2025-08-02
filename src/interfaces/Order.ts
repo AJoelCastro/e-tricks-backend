@@ -1,6 +1,7 @@
 import { Document, Types } from "mongoose";
 
 export interface IOrderItem {
+    _id:string;
     productId: Types.ObjectId;
     name: string;
     price: number;
@@ -28,10 +29,9 @@ export interface IMetadata {
 }
 
 
-export interface IOrder extends Document {
-    _id:string;
+export interface IOrderCreate {
     userId: string;
-    orderNumber:string;
+    orderNumber: string;
     items: IOrderItem[];
     subtotalAmount: number;
     totalAmount: number;
@@ -39,7 +39,7 @@ export interface IOrder extends Document {
     couponCode?: string;
     addressId: string;
     status: string;
-    orderType:string;
+    orderType: string;
     paymentId: string;
     paymentStatus: string;
     paymentMethod: string;
@@ -48,8 +48,13 @@ export interface IOrder extends Document {
     paymentDetails?: IPaymentDetails;
     confirmedAt?: Date;
     failedAt?: Date;
-    deliveryStatus?:string;
+    deliveryStatus?: string;
     metadata?: IMetadata;
+}
+
+// 2. La interfaz completa que extiende Document
+export interface IOrder extends Document, IOrderCreate {
+    _id: string;
     createdAt: Date;
     updatedAt: Date;
 }
