@@ -240,7 +240,11 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
                     });
                     throw new Error(errorMessage);
                 }
-
+               /*  const user = await userRepository.getUserWithCart(paymentData.metadata);
+                  await messageRepo.createMessage({
+                 message: `USER' ${user},userId ${userId}`
+                 }); */
+ 
                 await createOrderFromMetadata(paymentData, metadata);
                 await messageRepo.createMessage({
                     message: `✅ Orden creada con recálculo seguro: ${orderNumber}`
@@ -257,7 +261,7 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
         await messageRepo.createMessage({
             message: errorMessage,
             fullError: error instanceof Error ? {
-                name: error.name,
+                name:  error.name,
                 message: error.message,
                 stack: error.stack
             } : error
@@ -282,6 +286,10 @@ const createOrderFromMetadata = async (paymentData: any, metadata: any) => {
 
         // 1. OBTENER CARRITO ACTUAL DEL USUARIO
         const user = await userRepository.getUserWithCart(userId);
+           await messageRepo.createMessage({
+            message: `USER' ${user},userId ${userId},  ${user?.cart?.length}`
+        });
+
         if (!user?.cart?.length) {
             throw new Error('Carrito vacío al procesar pago');
         }
