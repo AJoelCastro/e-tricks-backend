@@ -1,4 +1,3 @@
-import { IOrderMetadata } from './../interfaces/Order';
 import { CouponRepository } from './../repositories/Coupon';
 import { OrderRepository } from './../repositories/Order';
 import { Request, Response } from "express";
