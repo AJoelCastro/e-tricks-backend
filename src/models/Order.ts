@@ -98,7 +98,7 @@ const OrderSchema = new Schema<IOrder>({
     },
     preferenceId: {
         type: String,
-        required: true
+        required: false
     },
     preferenceCreatedAt: {
         type: Date,

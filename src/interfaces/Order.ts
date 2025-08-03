@@ -66,6 +66,7 @@ export interface IOrderMetadata {
   order_type: string;
   coupon_code?: string | null;
   timestamp?: number;
+  preferenceId?: string; 
 }
 
 export interface IPaymentData {
@@ -78,5 +79,4 @@ export interface IPaymentData {
   currency_id: string;
   payment_method_id: string;
   payment_type_id: string;
-  preference_id?: string;
 }
