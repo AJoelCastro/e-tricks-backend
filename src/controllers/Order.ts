@@ -1,9 +1,10 @@
+import { IOrderMetadata } from './../interfaces/Order';
 import { CouponRepository } from './../repositories/Coupon';
 import { OrderRepository } from './../repositories/Order';
 import { Request, Response } from "express";
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import { OrderModel } from "../models/Order";
-import { IOrderMetadata ,IPaymentData} from '../interfaces/Order';
+import { IOrderMetadata, IPaymentData } from '../interfaces/Order';
 import { UserRepository } from "../repositories/User";
 import { ProductModel } from '../models/Product';
 import { MessageRepository } from '../repositories/Message';
@@ -132,13 +133,14 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
 
         // 🔒 METADATA MÍNIMA Y SEGURA (solo IDs y referencias)
         const secureMetadata = {
-            orderNumber: orderNumber,
-            userId: userId,
-            addressId: addressId,
-            orderType: orderType,
+            orderNumber, 
+            userId,       
+            addressId,    
+            orderType,
             couponCode: couponCode || null,
             timestamp: Date.now(),
         };
+
 
         const body = {
             items,
@@ -232,7 +234,7 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
             }
 
             if (paymentData.status === 'approved') {
-                const metadata = paymentData.metadata;
+                const metadata = paymentData.metadata as IOrderMetadata;
                 if (!metadata) {
                     const errorMessage = 'Metadata no encontrada en el pago aprobado';
                     await messageRepo.createMessage({
@@ -309,7 +311,7 @@ const createOrderFromMetadata = async (paymentData: any, metadata: IOrderMetadat
         // 1. OBTENER CARRITO ACTUAL DEL USUARIO
         const user = await userRepository.getUserWithCart(userId);
         await messageRepo.createMessage({
-            message: `USER' ${user},userId ${userId},  ${user?.cart?.length},  orderType ${ orderType},  orderNumber ${ orderNumber}`
+            message: `USER' ${user},userId ${userId},  ${user?.cart?.length},  orderType ${orderType},  orderNumber ${orderNumber}`
         });
 
         if (!user?.cart?.length) {
