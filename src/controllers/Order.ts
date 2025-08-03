@@ -308,7 +308,7 @@ const createOrderFromMetadata = async (paymentData: any, metadata: any) => {
         // 1. OBTENER CARRITO ACTUAL DEL USUARIO
         const user = await userRepository.getUserWithCart(userId);
         await messageRepo.createMessage({
-            message: `USER' ${user},userId ${userId},  ${user?.cart?.length}`
+            message: `USER' ${user},userId ${userId},  ${user?.cart?.length},  orderType ${ orderType},  orderNumber ${ orderNumber}`
         });
 
         if (!user?.cart?.length) {
