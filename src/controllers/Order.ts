@@ -82,17 +82,17 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
             }
 
             // VALIDAR STOCK DISPONIBLE
-        /*    const tallaEncontrada = product.stockPorTalla?.find(
-                (s) => s.talla === item.size
-            );
-
-            if (!tallaEncontrada || tallaEncontrada.stock < item.quantity) {
-                res.status(400).json({
-                    success: false,
-                    message: `Stock insuficiente para ${product.name} en talla ${item.size}`
-                });
-                return;
-            } */
+            /*    const tallaEncontrada = product.stockPorTalla?.find(
+                    (s) => s.talla === item.size
+                );
+    
+                if (!tallaEncontrada || tallaEncontrada.stock < item.quantity) {
+                    res.status(400).json({
+                        success: false,
+                        message: `Stock insuficiente para ${product.name} en talla ${item.size}`
+                    });
+                    return;
+                } */
 
             const discountedPrice = product.price * (1 - (product.descuento || 0) / 100);
             const itemTotal = discountedPrice * item.quantity;
@@ -146,14 +146,14 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
                 failure: `${process.env.FRONTEND_URL}/order/failure?oNum=${orderNumber}`,
                 pending: `${process.env.FRONTEND_URL}/order/pending?oNum=${orderNumber}`
             },
-            auto_return: "approved",   
+            auto_return: "approved",
             external_reference: orderNumber,
             notification_url: `${process.env.BACKEND_URL}/order/webhook`,
             statement_descriptor: "TRICKS",
             expires: true,
             expiration_date_from: new Date().toISOString(),
             expiration_date_to: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-            metadata: secureMetadata ,
+            metadata: secureMetadata,
             payment_methods: {
                 excluded_payment_methods: [
                     { id: "ticket" },
@@ -167,7 +167,7 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
 
         const preference = new Preference(client);
         const result = await preference.create({ body });
-        console.log("preference",preference)
+        console.log("preference", preference)
         res.json({
             success: true,
             data: {
@@ -191,9 +191,9 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
 // ==========================================
 
 export const handleWebhook = async (req: Request, res: Response): Promise<void> => {
-      try {
+    try {
         const { topic, id } = req.query;
-        
+
         // Log webhook received
         await messageRepo.createMessage({
             message: `Webhook received - topic: ${topic}, id: ${id}`
@@ -240,11 +240,32 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
                     });
                     throw new Error(errorMessage);
                 }
-               /*  const user = await userRepository.getUserWithCart(paymentData.metadata);
-                  await messageRepo.createMessage({
-                 message: `USER' ${user},userId ${userId}`
-                 }); */
- 
+                // Add detailed metadata logging
+                await messageRepo.createMessage({
+                    message: 'Metadata received from payment',
+                    fullError: {
+                        metadata: metadata,
+                        metadataType: typeof metadata,
+                        rawMetadata: JSON.stringify(metadata)
+                    }
+                });
+
+                // Verify critical metadata fields exist
+                if (!metadata.userId || !metadata.orderNumber) {
+                    const errorMessage = `Metadata incompleta. Faltan campos requeridos: ${JSON.stringify(metadata)}`;
+                    await messageRepo.createMessage({
+                        message: errorMessage,
+                        fullError: { metadata }
+                    });
+                    throw new Error(errorMessage);
+                }
+
+
+                /*  const user = await userRepository.getUserWithCart(paymentData.metadata);
+                   await messageRepo.createMessage({
+                  message: `USER' ${user},userId ${userId}`
+                  }); */
+
                 await createOrderFromMetadata(paymentData, metadata);
                 await messageRepo.createMessage({
                     message: `✅ Orden creada con recálculo seguro: ${orderNumber}`
@@ -257,19 +278,19 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
     } catch (error) {
         const errorMessage = `Error en webhook: ${error instanceof Error ? error.message : 'Unknown error'}`;
         console.error(errorMessage, error);
-        
+
         await messageRepo.createMessage({
             message: errorMessage,
             fullError: error instanceof Error ? {
-                name:  error.name,
+                name: error.name,
                 message: error.message,
                 stack: error.stack
             } : error
         });
 
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
-            message: 'Error interno del servidor al procesar el webhook' 
+            message: 'Error interno del servidor al procesar el webhook'
         });
     }
 };
@@ -286,7 +307,7 @@ const createOrderFromMetadata = async (paymentData: any, metadata: any) => {
 
         // 1. OBTENER CARRITO ACTUAL DEL USUARIO
         const user = await userRepository.getUserWithCart(userId);
-           await messageRepo.createMessage({
+        await messageRepo.createMessage({
             message: `USER' ${user},userId ${userId},  ${user?.cart?.length}`
         });
 
@@ -305,20 +326,20 @@ const createOrderFromMetadata = async (paymentData: any, metadata: any) => {
             }
 
             // 🔒 VALIDAR STOCK NUEVAMENTE (seguridad extra)
-          /*  const tallaEncontrada = product.stockPorTalla?.find(
-                (s) => s.talla === item.size
-            );
-
-            if (!tallaEncontrada || tallaEncontrada.stock < item.quantity) {
-                throw new Error(`Stock insuficiente: ${product.name} talla ${item.size}`); 
-            } */
+            /*  const tallaEncontrada = product.stockPorTalla?.find(
+                  (s) => s.talla === item.size
+              );
+  
+              if (!tallaEncontrada || tallaEncontrada.stock < item.quantity) {
+                  throw new Error(`Stock insuficiente: ${product.name} talla ${item.size}`); 
+              } */
 
             // 🔒 RECALCULAR PRECIOS (precios actuales de BD)
             const currentPrice = product.price;
             const currentDiscount = product.descuento || 0;
             const discountedPrice = currentPrice * (1 - currentDiscount / 100);
             const itemTotal = discountedPrice * item.quantity;
-            
+
             subtotalAmount += itemTotal;
 
             orderItems.push({
@@ -351,7 +372,7 @@ const createOrderFromMetadata = async (paymentData: any, metadata: any) => {
         // 4. VALIDAR QUE EL MONTO PAGADO COINCIDA 
         const paidAmount = paymentData.transaction_amount;
         const expectedAmount = finalTotal;
-        
+
         if (Math.abs(paidAmount - expectedAmount) > 0.01) { // Tolerancia de 1 centavo
             throw new Error(
                 `Monto pagado (${paidAmount}) no coincide con total esperado (${expectedAmount}). Volver a generar`
@@ -366,7 +387,7 @@ const createOrderFromMetadata = async (paymentData: any, metadata: any) => {
             orderNumber,
             items: orderItems,
             totalAmount: finalTotal,
-            subtotalAmount:  subtotalAmount,
+            subtotalAmount: subtotalAmount,
             discountAmount: discountAmount,
             couponCode: validCoupon?.code,
             addressId,
@@ -427,7 +448,7 @@ const createOrderFromMetadata = async (paymentData: any, metadata: any) => {
 
     } catch (error) {
         console.error('❌ Error creando orden desde metadata:', error);
-        
+
         throw error;
     }
 };
@@ -727,7 +748,7 @@ export const confirmOrderPayment = async (req: Request, res: Response): Promise<
 export const requestItemRefund = async (req: Request, res: Response): Promise<void> => {
     try {
         const { orderId, itemId } = req.params;
-        const { reason } = req.body; 
+        const { reason } = req.body;
 
         // Validar parámetros
         if (!orderId || !itemId) {
