@@ -60,11 +60,11 @@ export interface IOrder extends Document, IOrderCreate {
 }
 
 export interface IOrderMetadata {
-  userId: string;
-  orderNumber: string;
-  addressId: string;
-  orderType: string;
-  couponCode?: string | null;
+  user_id: string;
+  order_number: string;
+  address_id: string;
+  order_type: string;
+  coupon_code?: string | null;
   timestamp?: number;
 }
 

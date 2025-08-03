@@ -238,7 +238,7 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
                     const errorMessage = 'Metadata no encontrada en el pago aprobado';
                     await messageRepo.createMessage({
                         message: errorMessage,
-                        fullError: { paymentData }
+                        fullError: { paymentData}
                     });
                     throw new Error(errorMessage);
                 }
@@ -253,14 +253,14 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
                 });
 
                 // Verify critical metadata fields exist
-                if (!metadata.userId || !metadata.orderNumber) {
+             /*   if (!metadata || !metadata.orderNumber) {
                     const errorMessage = `Metadata incompleta. Faltan campos requeridos: ${JSON.stringify(metadata)}`;
                     await messageRepo.createMessage({
                         message: errorMessage,
                         fullError: { metadata }
                     });
                     throw new Error(errorMessage);
-                }
+                } */
 
 
                 /*  const user = await userRepository.getUserWithCart(paymentData.metadata);
@@ -303,14 +303,14 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
 
 const createOrderFromMetadata = async (paymentData: any, metadata: IOrderMetadata) => {
     try {
-        const { userId, addressId, orderType, couponCode, orderNumber } = metadata;
+        const { user_id, order_number, address_id, order_type, coupon_code } = metadata;
 
-        console.log(`🔄 Recalculando orden desde carrito actual: ${orderNumber}`);
+        console.log(`🔄 Recalculando orden desde carrito actual: ${order_number}`);
 
         // 1. OBTENER CARRITO ACTUAL DEL USUARIO
-        const user = await userRepository.getUserWithCart(userId);
+        const user = await userRepository.getUserWithCart(user_id);
         await messageRepo.createMessage({
-            message: `USER' ${user},userId ${userId},  ${user?.cart?.length},  orderType ${orderType},  orderNumber ${orderNumber}`
+            message: `USER' ${user},userId ${user_id},  ${user?.cart?.length},  orderType ${order_type},  orderNumber ${order_number}`
         });
 
         if (!user?.cart?.length) {
@@ -360,14 +360,14 @@ const createOrderFromMetadata = async (paymentData: any, metadata: IOrderMetadat
         let discountAmount = 0;
         let validCoupon = null;
 
-        if (couponCode) {
-            validCoupon = await couponRepository.findValidCoupon(couponCode);
+        if (coupon_code) {
+            validCoupon = await couponRepository.findValidCoupon(coupon_code);
             if (validCoupon) {
                 discountAmount = subtotalAmount * (validCoupon.discountPercentage / 100);
                 finalTotal = subtotalAmount - discountAmount;
-                console.log(`🎫 Cupón aplicado: ${couponCode} - ${discountAmount.toFixed(2)}`);
+                console.log(`🎫 Cupón aplicado: ${coupon_code} - ${discountAmount.toFixed(2)}`);
             } else {
-                console.warn(`⚠️ Cupón no válido al crear orden: ${couponCode}`);
+                console.warn(`⚠️ Cupón no válido al crear orden: ${coupon_code}`);
             }
         }
 
@@ -385,16 +385,16 @@ const createOrderFromMetadata = async (paymentData: any, metadata: IOrderMetadat
 
         // 5. CREAR LA ORDEN CON DATOS RECALCULADOS
         const orderData = {
-            userId,
-            orderNumber,
+           userId: user_id,
+           orderNumber: order_number,
             items: orderItems,
             totalAmount: finalTotal,
             subtotalAmount: subtotalAmount,
             discountAmount: discountAmount,
             couponCode: validCoupon?.code,
-            addressId,
+            addressId:address_id,
             status: 'processing',
-            orderType,
+            orderType: order_type,
             paymentId: paymentData.id.toString(),
             paymentStatus: paymentData.status,
             paymentMethod: 'mercado_pago',
@@ -438,12 +438,12 @@ const createOrderFromMetadata = async (paymentData: any, metadata: IOrderMetadat
 
         // 8. MARCAR CUPÓN COMO USADO
         if (validCoupon) {
-            await couponRepository.markCouponAsUsed(validCoupon.code, userId);
+            await couponRepository.markCouponAsUsed(validCoupon.code, user_id);
             console.log(`🎫 Cupón marcado como usado: ${validCoupon.code}`);
         }
 
         // 9. LIMPIAR CARRITO
-        await userRepository.clearUserCart(userId);
+        await userRepository.clearUserCart(user_id);
         console.log(`🧹 Carrito limpiado`);
 
         return savedOrder;
