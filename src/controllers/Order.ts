@@ -300,7 +300,7 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
 // 3. CREAR ORDEN CON RECÁLCULO COMPLETO
 // ==========================================
 
-const createOrderFromMetadata = async (paymentData: IPaymentData, metadata: IOrderMetadata) => {
+const createOrderFromMetadata = async (paymentData: any, metadata: IOrderMetadata) => {
     try {
         const { userId, addressId, orderType, couponCode, orderNumber } = metadata;
 
