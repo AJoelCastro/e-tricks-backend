@@ -397,7 +397,7 @@ const createOrderFromMetadata = async (paymentData: any, metadata: IOrderMetadat
             orderType: order_type,
             paymentId: paymentData.id.toString(),
             paymentStatus: paymentData.status,
-            paymentMethod: 'mercado_pago',
+            paymentMethod:  paymentData.payment_method_id,
             preferenceId: paymentData.preference_id 
            || paymentData.preferenceId 
            || paymentData.preference?.id
