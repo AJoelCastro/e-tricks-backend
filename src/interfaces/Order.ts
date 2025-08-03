@@ -58,3 +58,25 @@ export interface IOrder extends Document, IOrderCreate {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export interface IOrderMetadata {
+  userId: string;
+  orderNumber: string;
+  addressId: string;
+  orderType: string;
+  couponCode?: string | null;
+  timestamp?: number;
+}
+
+export interface IPaymentData {
+  id: string;
+  status: string;
+  transaction_amount: number;
+  external_reference?: string;
+  metadata?: IOrderMetadata;
+  status_detail: string;
+  currency_id: string;
+  payment_method_id: string;
+  payment_type_id: string;
+  preference_id?: string;
+}

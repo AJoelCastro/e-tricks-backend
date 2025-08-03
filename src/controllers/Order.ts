@@ -3,6 +3,7 @@ import { OrderRepository } from './../repositories/Order';
 import { Request, Response } from "express";
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import { OrderModel } from "../models/Order";
+import { IOrderMetadata ,IPaymentData} from '../interfaces/Order';
 import { UserRepository } from "../repositories/User";
 import { ProductModel } from '../models/Product';
 import { MessageRepository } from '../repositories/Message';
@@ -299,7 +300,7 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
 // 3. CREAR ORDEN CON RECÁLCULO COMPLETO
 // ==========================================
 
-const createOrderFromMetadata = async (paymentData: any, metadata: any) => {
+const createOrderFromMetadata = async (paymentData: IPaymentData, metadata: IOrderMetadata) => {
     try {
         const { userId, addressId, orderType, couponCode, orderNumber } = metadata;
 
