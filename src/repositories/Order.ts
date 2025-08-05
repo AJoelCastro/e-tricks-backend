@@ -1,6 +1,7 @@
 import { OrderModel } from "../models/Order";
 import { IOrder, IOrderCreate } from "../interfaces/Order";
 import { CouponRepository } from "./Coupon";
+import { on } from "events";
 
 export class OrderRepository {
     private couponRepository: CouponRepository;
@@ -21,6 +22,16 @@ export class OrderRepository {
     async getOrderById(orderId: string) {
         try {
             return await OrderModel.findById(orderId)
+                .populate('items.productId')
+                .exec();
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async getOrderByNumber(oNumber: string) {
+        try {
+            return await OrderModel.find({orderNumber:oNumber})
                 .populate('items.productId')
                 .exec();
         } catch (error) {
@@ -63,7 +74,6 @@ export class OrderRepository {
         }
     }
 
-    // MÉTODO CORREGIDO PARA SOLICITAR REEMBOLSO
     async requestRefund(orderId: string, itemId: string) {
         try {
             // Buscar la orden y verificar que existe

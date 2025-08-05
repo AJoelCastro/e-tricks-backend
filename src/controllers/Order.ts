@@ -750,6 +750,17 @@ export const confirmOrderPayment = async (req: Request, res: Response): Promise<
     }
 };
 
+export const getOrderByNumber = async (req: Request, res: Response) => {
+    try {
+        const { orderNumber} = req.params;
+        const order = await orderRepository.getOrderByNumber(orderNumber);
+        res.status(200).json(order);
+    } catch (error) {
+        res.status(500).json(error);
+    }
+};
+
+
 export const requestItemRefund = async (req: Request, res: Response): Promise<void> => {
     try {
         const { orderId, itemId } = req.params;
