@@ -1,26 +1,23 @@
+
 import express from 'express'
 import bodyParser from 'body-parser';
 import {
-    createOrder,
-    confirmOrderPayment,
     getOrderDetails,
     getUserOrders,
     cancelOrder,
     handleWebhook,
     createPreference,
     requestItemRefund, 
-    getRefundableItems 
+    getRefundableItems ,
+    getOrderByNumber
 
 } from "../controllers/Order";
 const authenticateClerkToken = require('../middleware/auth');
 
 const router = express.Router();
 
-// Crear nueva orden y obtener preferencia de MercadoPago
-router.post('/checkout', authenticateClerkToken, createOrder);
-
-// Confirmar pago manualmente (opcional)
-router.post('/checkout/payment/confirm', authenticateClerkToken, confirmOrderPayment );
+// Obtener detalles de una orden con el número de orden
+router.get('/:oNumber/onumber', authenticateClerkToken, getOrderByNumber);
 
 // Obtener detalles de una orden específica
 router.get('/:orderId', authenticateClerkToken, getOrderDetails);

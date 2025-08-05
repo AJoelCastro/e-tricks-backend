@@ -144,9 +144,9 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
         const body = {
             items,
             back_urls: {
-                success: `${process.env.FRONTEND_URL}/order/success?oNum=${orderNumber}`,
-                failure: `${process.env.FRONTEND_URL}/order/failure?oNum=${orderNumber}`,
-                pending: `${process.env.FRONTEND_URL}/order/pending?oNum=${orderNumber}`
+                success: `${process.env.FRONTEND_URL}/compras`,
+                failure: `${process.env.FRONTEND_URL}/carrito/pagos`,
+                pending: `${process.env.FRONTEND_URL}/carrito/pagos`
             },
             auto_return: "approved",
             external_reference: orderNumber,
@@ -169,7 +169,6 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
 
         const preference = new Preference(client);
         const result = await preference.create({ body });
-        console.log("preference", preference)
         res.json({
             success: true,
             data: {
@@ -196,10 +195,7 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
     try {
         const { topic, id } = req.query;
 
-        // Log webhook received
-        await messageRepo.createMessage({
-            message: `Webhook received - topic: ${topic}, id: ${id}`
-        });
+      
 
         if (topic === 'payment') {
             const paymentResponse = await payment.get({ id: id as string });
@@ -208,26 +204,15 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
             const orderNumber = paymentData.external_reference;
             if (!orderNumber) {
                 const errorMessage = 'OrderNumber no encontrado en el webhook de pago';
-                await messageRepo.createMessage({
-                    message: errorMessage,
-                    fullError: { paymentData }
-                });
                 res.status(400).json({ success: false, message: errorMessage });
                 return;
             }
 
-            // Log payment metadata
-            await messageRepo.createMessage({
-                message: `Payment metadata received for order ${orderNumber}`,
-                fullError: { metadata: paymentData.metadata }
-            });
+         
 
             // Verificar idempotencia
             const existingOrder = await OrderModel.findOne({ orderNumber });
-            if (existingOrder) {
-                await messageRepo.createMessage({
-                    message: `Orden ya procesada anteriormente: ${orderNumber}`
-                });
+            if (existingOrder) {            
                 res.status(200).json({ success: true, message: 'Orden ya procesada' });
                 return;
             }
@@ -235,22 +220,10 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
             if (paymentData.status === 'approved') {
                 const metadata = paymentData.metadata as IOrderMetadata;
                 if (!metadata) {
-                    const errorMessage = 'Metadata no encontrada en el pago aprobado';
-                    await messageRepo.createMessage({
-                        message: errorMessage,
-                        fullError: { paymentData}
-                    });
+                    const errorMessage = 'Metadata no encontrada en el pago aprobado';                
                     throw new Error(errorMessage);
                 }
-                // Add detailed metadata logging
-                await messageRepo.createMessage({
-                    message: 'Metadata received from payment',
-                    fullError: {
-                        metadata: metadata,
-                        metadataType: typeof metadata,
-                        rawMetadata: JSON.stringify(metadata)
-                    }
-                });
+             
 
                 // Verify critical metadata fields exist
              /*   if (!metadata || !metadata.orderNumber) {
@@ -268,10 +241,7 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
                   message: `USER' ${user},userId ${userId}`
                   }); */
 
-                await createOrderFromMetadata(paymentData, metadata);
-                await messageRepo.createMessage({
-                    message: `✅ Orden creada con recálculo seguro: ${orderNumber}`
-                });
+                await createOrder(paymentData, metadata);            
             }
         }
 
@@ -301,17 +271,14 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
 // 3. CREAR ORDEN CON RECÁLCULO COMPLETO
 // ==========================================
 
-const createOrderFromMetadata = async (paymentData: any, metadata: IOrderMetadata) => {
+const createOrder = async (paymentData: any, metadata: IOrderMetadata) => {
     try {
         const { user_id, order_number, address_id, order_type, coupon_code } = metadata;
 
-        console.log(`🔄 Recalculando orden desde carrito actual: ${order_number}`);
 
         // 1. OBTENER CARRITO ACTUAL DEL USUARIO
         const user = await userRepository.getUserWithCart(user_id);
-        await messageRepo.createMessage({
-            message: `USER' ${user},userId ${user_id},  ${user?.cart?.length},  orderType ${order_type},  orderNumber ${order_number}`
-        });
+      
 
         if (!user?.cart?.length) {
             throw new Error('Carrito vacío al procesar pago');
@@ -381,7 +348,6 @@ const createOrderFromMetadata = async (paymentData: any, metadata: IOrderMetadat
             );
         }
 
-        console.log(`✅ Validación de monto: Pagado=${paidAmount}, Esperado=${expectedAmount}`);
 
         // 5. CREAR LA ORDEN CON DATOS RECALCULADOS
         const orderData = {
@@ -457,269 +423,13 @@ const createOrderFromMetadata = async (paymentData: any, metadata: IOrderMetadat
         throw error;
     }
 };
-// ==========================================
-// FUNCIONES AUXILIARES
-// ==========================================
 
-const handleApprovedPayment = async (order: any) => {
+export const getOrderByNumber = async (req: Request, res: Response) => {
     try {
-        console.log(`Procesando pago aprobado para orden: ${order._id}`);
+        const { orderNumber} = req.params;
+        const order = await orderRepository.getOrderByNumber(orderNumber);
 
-        // 1. Confirmar stock (de reservado a vendido)
-        for (const item of order.items) {
-            await ProductModel.findByIdAndUpdate(
-                item.productId,
-                {
-                    $inc: {
-                        reservedStock: -item.quantity,
-                        soldStock: item.quantity
-                    }
-                }
-            );
-        }
-
-        // 2. Marcar cupón como usado
-        if (order.couponCode) {
-            await couponRepository.markCouponAsUsed(order.couponCode, order.userId);
-            console.log(`Cupón marcado como usado: ${order.couponCode}`);
-        }
-
-        // 3. Limpiar carrito del usuario
-        await userRepository.clearUserCart(order.userId.toString());
-        console.log(`Carrito limpiado para usuario: ${order.userId}`);
-
-        // 4. Actualizar estado final
-        await OrderModel.findByIdAndUpdate(order._id, {
-            status: 'processing', // Cambiar de 'pending' a 'processing'
-            confirmedAt: new Date()
-        });
-
-        console.log(`Pago procesado exitosamente para orden: ${order._id}`);
-
-    } catch (error) {
-        console.error('Error procesando pago aprobado:', error);
-    }
-};
-
-const handleRejectedPayment = async (order: any) => {
-    try {
-        console.log(`Procesando pago rechazado para orden: ${order._id}`);
-
-        // 1. Liberar stock reservado
-        for (const item of order.items) {
-            await ProductModel.findByIdAndUpdate(
-                item.productId,
-                {
-                    $inc: {
-                        stock: item.quantity,
-                        reservedStock: -item.quantity
-                    }
-                }
-            );
-        }
-
-        // 2. Actualizar estado
-        await OrderModel.findByIdAndUpdate(order._id, {
-            status: 'payment_failed',
-            failedAt: new Date()
-        });
-
-        console.log(`OStock liberado para orden rechazada: ${order._id}`);
-
-    } catch (error) {
-        console.error('Error procesando pago rechazado:', error);
-    }
-};
-
-export const createOrder = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const { userId, addressId, couponCode, paymentData, userEmail } = req.body;
-
-        if (!userId || !addressId) {
-            res.status(400).json({
-                success: false,
-                message: 'Se requieren userId y addressId'
-            });
-            return;
-        }
-
-        // Obtener usuario con carrito
-        const user = await userRepository.getUserWithCart(userId);
-        if (!user?.cart?.length) {
-            res.status(400).json({
-                success: false,
-                message: 'El carrito está vacío'
-            });
-            return;
-        }
-
-        let subtotalAmount = 0;
-        const orderItems = await Promise.all(
-            user.cart.map(async (item) => {
-                const product = await ProductModel.findById(item.productId);
-                if (!product) {
-                    throw new Error(`Producto con ID ${item.productId} no encontrado`);
-                }
-
-                const itemTotal = product.price * item.quantity;
-                subtotalAmount += itemTotal;
-
-                return {
-                    productId: product._id,
-                    name: product.name,
-                    price: product.price,
-                    quantity: item.quantity,
-                    size: item.size,
-                    image: product.images[0]
-                };
-            })
-        );
-
-        let orderData: any = {
-            userId,
-            items: orderItems,
-            subtotalAmount,
-            orderType: 'pickup',
-            totalAmount: subtotalAmount,
-            addressId,
-            paymentMethod: paymentData?.paymentMethod || 'mercado_pago',
-            status: 'pending',
-            paymentStatus: 'pending'
-        };
-
-        // Aplicar cupón si existe
-        if (couponCode) {
-            const coupon = await couponRepository.findValidCoupon(couponCode);
-            if (coupon) {
-                const discountAmount = subtotalAmount * (coupon.discountPercentage / 100);
-                orderData.totalAmount = subtotalAmount - discountAmount;
-                orderData.discountAmount = discountAmount;
-                orderData.couponCode = coupon.code;
-            }
-        }
-
-        const savedOrder = await orderRepository.createOrder(orderData);
-
-        // Si se proporciona información de pago, procesarla
-        if (paymentData && paymentData.token) {
-            try {
-                // Procesar pago con MercadoPago
-                const paymentRequest = {
-                    transaction_amount: orderData.totalAmount,
-                    token: paymentData.token,
-                    description: `Orden #${savedOrder._id}`,
-                    installments: paymentData.installments || 1,
-                    payer: {
-                        email: userEmail,
-                        identification: {
-                            type: paymentData.payer.identification.type,
-                            number: paymentData.payer.identification.number
-                        }
-                    },
-                    external_reference: savedOrder.userId,
-                    notification_url: `${process.env.BACKEND_URL}/api/orders/webhook`,
-                    statement_descriptor: 'TRICKS'
-                };
-
-                const paymentResponse = await payment.create({
-                    body: paymentRequest
-                });
-
-                if (paymentResponse.id) {
-                    savedOrder.paymentId = paymentResponse.id.toString();
-                    savedOrder.paymentStatus = paymentResponse.status!;
-                    savedOrder.status = mapPaymentStatus(paymentResponse.status!);
-                    await savedOrder.save();
-
-                    // Si el pago fue aprobado, marcar cupón como usado y limpiar carrito
-                    if (paymentResponse.status === 'approved') {
-                        if (savedOrder.couponCode) {
-                            await couponRepository.markCouponAsUsed(savedOrder.couponCode, savedOrder.userId);
-                        }
-                        await userRepository.clearUserCart(savedOrder.userId.toString());
-                    }
-                }
-
-                res.status(201).json({
-                    success: true,
-                    data: {
-                        order: savedOrder,
-                        payment: {
-                            id: paymentResponse.id,
-                            status: paymentResponse.status,
-                            status_detail: paymentResponse.status_detail
-                        }
-                    }
-                });
-
-            } catch (paymentError) {
-                console.error('Error procesando pago:', paymentError);
-                res.status(201).json({
-                    success: true,
-                    data: {
-                        order: savedOrder,
-                        payment_error: 'Error procesando el pago. La orden fue creada pero el pago falló.'
-                    }
-                });
-            }
-        } else {
-            // Solo crear la orden sin procesar pago
-            res.status(201).json({
-                success: true,
-                data: {
-                    order: savedOrder
-                }
-            });
-        }
-
-    } catch (error) {
-        console.error('Error al crear orden en servidor:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al crear orden',
-            error: error instanceof Error ? error.message : 'Error desconocido'
-        });
-    }
-};
-
-
-
-
-export const confirmOrderPayment = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const { orderId, paymentId } = req.body;
-
-        if (!orderId || !paymentId) {
-            res.status(400).json({
-                success: false,
-                message: 'Se requieren orderId y paymentId'
-            });
-            return;
-        }
-
-        // Verificar el pago en MercadoPago
-        const paymentResponse = await payment.get({ id: paymentId });
-
-        if (!paymentResponse) {
-            res.status(404).json({
-                success: false,
-                message: 'Pago no encontrado en MercadoPago'
-            });
-            return;
-        }
-
-        // Actualizar la orden con el estado del pago
-        const updatedOrder = await OrderModel.findByIdAndUpdate(
-            orderId,
-            {
-                paymentId: paymentResponse.id,
-                paymentStatus: paymentResponse.status,
-                status: mapPaymentStatus(paymentResponse.status!)
-            },
-            { new: true }
-        );
-
-        if (!updatedOrder) {
+        if (!order) {
             res.status(404).json({
                 success: false,
                 message: 'Orden no encontrada'
@@ -727,33 +437,6 @@ export const confirmOrderPayment = async (req: Request, res: Response): Promise<
             return;
         }
 
-
-        if (paymentResponse.status === 'approved') {
-            if (updatedOrder.couponCode) {
-                await couponRepository.markCouponAsUsed(updatedOrder.couponCode, updatedOrder.userId,);
-            }
-
-            await userRepository.clearUserCart(updatedOrder.userId.toString());
-        }
-
-        res.json({
-            success: true,
-            data: updatedOrder
-        });
-
-    } catch (error) {
-        console.error('Error confirmando pago:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error confirmando pago'
-        });
-    }
-};
-
-export const getOrderByNumber = async (req: Request, res: Response) => {
-    try {
-        const { orderNumber} = req.params;
-        const order = await orderRepository.getOrderByNumber(orderNumber);
         res.status(200).json(order);
     } catch (error) {
         res.status(500).json(error);
