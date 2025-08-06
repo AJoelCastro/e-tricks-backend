@@ -60,6 +60,15 @@ export class UserRepository {
             throw error;
         }
     }
+
+    async updateQuantityCartItem (userId:string, idCartItem:string, quantity: number){
+        try {
+            return await UserModel.updateOne({userId: userId, 'cart._id': idCartItem}, {$set: {'cart.$.quantity': quantity}});
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async getCartItems (userId:string){
         try {
             return await UserModel.findOne({userId: userId}).populate('cart').select('favorites -_id');

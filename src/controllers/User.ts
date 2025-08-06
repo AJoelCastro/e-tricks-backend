@@ -209,6 +209,24 @@ export const removeCartItem = async (req: Request, res: Response): Promise<void>
     }
 }
 
+export const updateQuantityCartItem = async (req: Request, res: Response): Promise<void> =>{
+    try {
+        const userId = req.params.userId;
+        const {idCartItem, quantity} = req.body;
+        
+        if(!userId || !idCartItem || !quantity){
+            res.status(400).json({message: 'El id del usuario, el id del item del carrito y la cantidad son obligatorios'});
+            return;
+        }
+        
+        const dataUpdate = await userRepository.updateQuantityCartItem(userId, idCartItem, quantity);
+        res.status(200).json(dataUpdate);
+    } catch (error) {
+        console.error('Error in updateQuantityCartItem:', error);
+        res.status(500).json({message: 'Error interno del servidor'});
+    }
+}
+
 export const getAddresses = async (req: Request, res: Response) => {
   try {
     const userId = req.params.userId;

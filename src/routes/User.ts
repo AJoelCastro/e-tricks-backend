@@ -11,7 +11,8 @@ import {
   getAddresses,
   addAddress,
   updateAddress,
-  deleteAddress
+  deleteAddress,
+  updateQuantityCartItem
 } from "../controllers/User";
 
 const authenticateClerkToken = require('../middleware/auth');
@@ -29,6 +30,7 @@ router.delete('/removeFavorite/:userId', authenticateClerkToken, removeFavorite)
 router.get('/getCartItems/:userId', authenticateClerkToken, getCartItems);
 router.post('/addCartItem/:userId', authenticateClerkToken, addCartItem);
 router.delete('/removeCartItem/:userId', authenticateClerkToken, removeCartItem);
+router.put('/updateQuantityCartItem/:userId', authenticateClerkToken, updateQuantityCartItem);
 
 // Direcciones
 router.get('/addresses/:userId', authenticateClerkToken, getAddresses);
