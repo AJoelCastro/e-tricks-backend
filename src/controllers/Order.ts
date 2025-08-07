@@ -424,6 +424,15 @@ const createOrder = async (paymentData: any, metadata: IOrderMetadata) => {
     }
 };
 
+export const getAllOrderDetails = async (req: Request, res: Response) => {
+    try {
+        const orderDetails = await orderRepository.getAllOrderDetails();
+        res.status(200).json(orderDetails);
+    } catch (error) {
+        res.status(500).json(error);
+    }
+}
+
 export const getOrderByNumber = async (req: Request, res: Response) => {
     try {
         const { orderNumber} = req.params;

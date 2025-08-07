@@ -1,6 +1,12 @@
 import { verifyToken } from '@clerk/backend';
 import { NextFunction, Request, Response } from 'express';
-
+interface CustomSessionClaims {
+  metadata?: {
+    role?: string | string[];
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
 async function authenticateClerkToken(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ message: 'Token no encontrado' });
@@ -8,7 +14,7 @@ async function authenticateClerkToken(req: Request, res: Response, next: NextFun
   const token = authHeader.replace('Bearer ', '');
   
   try {
-    const { sessionId, userId, getToken } = await verifyToken(token, {
+    const { sessionId, userId } = await verifyToken(token, {
       secretKey: process.env.CLERK_SECRET_KEY,
     });
 
@@ -19,5 +25,6 @@ async function authenticateClerkToken(req: Request, res: Response, next: NextFun
     return res.status(401).json({ message: 'Token inválido' });
   }
 }
+
 
 module.exports = authenticateClerkToken;

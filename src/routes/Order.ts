@@ -9,13 +9,15 @@ import {
     createPreference,
     requestItemRefund, 
     getRefundableItems ,
-    getOrderByNumber
+    getOrderByNumber,
+    getAllOrderDetails
 
 } from "../controllers/Order";
 const authenticateClerkToken = require('../middleware/auth');
+const authenticateAdminToken = require('../middleware/authAdmin');
 
 const router = express.Router();
-
+router.get('/getAll', authenticateAdminToken, getAllOrderDetails);
 // Obtener detalles de una orden con el número de orden
 router.get('/:oNumber/onumber', authenticateClerkToken, getOrderByNumber);
 

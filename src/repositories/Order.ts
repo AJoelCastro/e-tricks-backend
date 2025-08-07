@@ -39,6 +39,17 @@ export class OrderRepository {
         }
     }
 
+    async getAllOrderDetails() {
+        try {
+            return await OrderModel.find()
+                .populate('items.productId')
+                .sort({ createdAt: -1 })
+                .exec();
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async getOrdersByUser(userId: string) {
         try {
             return await OrderModel.find({ userId: userId })
