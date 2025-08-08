@@ -29,9 +29,6 @@ async function authenticateAdminToken(req: Request, res: Response, next: NextFun
       userRoles = Array.isArray(role) ? role : [role];
     } 
 
-
-    console.log('userRoles:', userRoles);
-
     const hasAdminRole = userRoles.includes('admin');
 
     if (!hasAdminRole) {

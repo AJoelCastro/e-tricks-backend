@@ -359,6 +359,7 @@ const createOrder = async (paymentData: any, metadata: IOrderMetadata) => {
             discountAmount: discountAmount,
             couponCode: validCoupon?.code,
             addressId:address_id,
+            address: user.addresses.find(addr => addr._id?.toString() === address_id) || undefined,
             status: 'processing',
             orderType: order_type,
             paymentId: paymentData.id.toString(),

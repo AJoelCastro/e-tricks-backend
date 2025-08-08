@@ -44,6 +44,17 @@ const OrderItemSchema = new Schema<IOrderItem>({
 
 }, { _id: true });
 
+const AddressSchema = new Schema({
+    name: { type: String, required: true },
+    street: { type: String, required: true },
+    number: { type: String, required: true },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    zipCode: { type: String, required: true },
+    country: { type: String, required: true },
+    phone: { type: String, required: true }
+}, { _id: false });
+
 const OrderSchema = new Schema<IOrder>({
     userId: {
         type: String,
@@ -63,6 +74,10 @@ const OrderSchema = new Schema<IOrder>({
     },
     addressId: {
         type: String,
+        required: true
+    },
+    address: {
+        type: AddressSchema,
         required: true
     },
     status: {

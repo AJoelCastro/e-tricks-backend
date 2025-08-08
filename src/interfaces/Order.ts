@@ -1,4 +1,5 @@
 import { Document, Types } from "mongoose";
+import { IAddress } from "./Address";
 
 export interface IOrderItem {
     _id:string;
@@ -38,6 +39,7 @@ export interface IOrderCreate {
     discountAmount: number;
     couponCode?: string;
     addressId: string;
+    address?: IAddress;
     status: string;
     orderType: string;
     paymentId: string;
