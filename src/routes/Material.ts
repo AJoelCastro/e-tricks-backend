@@ -10,7 +10,7 @@ const authenticateClerkToken = require('../middleware/auth');
 
 const router = express.Router();
 
-router.get('/', getAllMaterials);
+router.get('/getAll', getAllMaterials);
 router.get('/:id', getMaterialById);
 router.post('/create', createMaterial);
 router.put('/:id/update', authenticateClerkToken, updateMaterial);
