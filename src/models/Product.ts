@@ -45,7 +45,7 @@ const productSchema = new Schema<IProduct>({
   createdAt: { type: Date, default: Date.now },
   isNewProduct: { type: Boolean, required: true},
   isTrending: { type: Boolean, default: false },
-  season: { type: String, enum: ['verano', 'invierno', 'otoño', 'primavera', ''], default: '' },
+  season: { type: String, enum: ['Verano', 'Invierno', 'Otoño', 'Primavera', 'Todas las temporadas'], default: 'Todas las temporadas' },
 });
 
 

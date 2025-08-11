@@ -11,6 +11,7 @@ import {
     getProductsByIdMarcaAndIdCategoryProduct
 } from '../controllers/Product';
 const authenticateClerkToken = require('../middleware/auth');
+const authenticateAdminToken = require('../middleware/authAdmin')
 
 const router = express.Router();
 
@@ -23,7 +24,7 @@ router.get('/:marcaCategory/:prodCategory/productsBrands', getProductsByIdMarcaA
 router.get('/getWithDescuento', getProductsWithDescuento);
 router.get('/getNewProducts', getNewProducts);
 
-router.post('/create', createProduct);
+router.post('/create', authenticateAdminToken,createProduct);
 router.put('/:id/update',authenticateClerkToken, getProductById);
 router.delete('/:id/delete',authenticateClerkToken, getProductById);
 
