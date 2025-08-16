@@ -24,7 +24,7 @@ const upload = multer({
     limits: {
         fileSize: 5 * 1024 * 1024, // 5MB límite
     },
-    fileFilter: (req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+    fileFilter: (req: any, file: any, cb: any) => {
         const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
         if (allowedMimes.includes(file.mimetype)) {
             cb(null, true);
@@ -127,10 +127,10 @@ export const getProductImages = async (req: Request, res: Response): Promise<voi
 };
 
 // 3. Crear una nueva carpeta de producto y subir imágenes
-export const createProductFolder = async (req: Request , res: Response): Promise<void> => {
+export const createProductFolder = async (req: any, res: Response): Promise<void> => {
     try {
         const { productName } = req.body;
-        const files = req.files as Express.Multer.File[];
+        const files = req.files as any[];
 
         if (!productName) {
             res.status(400).json({ message: 'El nombre del producto es requerido' });
@@ -197,10 +197,10 @@ export const createProductFolder = async (req: Request , res: Response): Promise
 };
 
 // 4. Agregar más imágenes a una carpeta existente
-export const addImagesToFolder = async (req: Request, res: Response): Promise<void> => {
+export const addImagesToFolder = async (req: any, res: Response): Promise<void> => {
     try {
         const { folderName } = req.params;
-        const files = req.files as Express.Multer.File[];
+        const files = req.files as any[];
 
         if (!folderName) {
             res.status(400).json({ message: 'El nombre de la carpeta es requerido' });
@@ -361,7 +361,6 @@ const checkFolderExists = async (folderPath: string): Promise<boolean> => {
         return false;
     }
 };
-
 // Obtener todos los productos
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
     try {
