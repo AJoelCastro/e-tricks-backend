@@ -24,7 +24,7 @@ const upload = multer({
     limits: {
         fileSize: 5 * 1024 * 1024, // 5MB límite
     },
-    fileFilter: (req, file, cb) => {
+    fileFilter: (req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
         const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
         if (allowedMimes.includes(file.mimetype)) {
             cb(null, true);
@@ -48,7 +48,7 @@ export const getAllProductFolders = async (req: Request, res: Response): Promise
 
         const response = await s3Client.send(command);
 
-        const folders = response.CommonPrefixes?.map(prefix => {
+        const folders = response.CommonPrefixes?.map((prefix: any) => {
             const folderPath = prefix.Prefix?.replace('productos/', '').replace('/', '');
             return {
                 folderName: folderPath,
@@ -127,7 +127,7 @@ export const getProductImages = async (req: Request, res: Response): Promise<voi
 };
 
 // 3. Crear una nueva carpeta de producto y subir imágenes
-export const createProductFolder = async (req: Request, res: Response): Promise<void> => {
+export const createProductFolder = async (req: Request , res: Response): Promise<void> => {
     try {
         const { productName } = req.body;
         const files = req.files as Express.Multer.File[];
@@ -323,7 +323,7 @@ export const deleteProductFolder = async (req: Request, res: Response): Promise<
         }
 
         // Eliminar todas las imágenes
-        const deletePromises = listResponse.Contents.map((obj:any) => {
+        const deletePromises = listResponse.Contents.map((obj: any) => {
             const deleteCommand = new DeleteObjectCommand({
                 Bucket: BUCKET_NAME,
                 Key: obj.Key!
@@ -361,6 +361,7 @@ const checkFolderExists = async (folderPath: string): Promise<boolean> => {
         return false;
     }
 };
+
 // Obtener todos los productos
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
     try {
