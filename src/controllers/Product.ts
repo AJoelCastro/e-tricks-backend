@@ -87,12 +87,12 @@ export const getProductImages = async (req: Request, res: Response): Promise<voi
 
         const images = await Promise.all(
             (response.Contents || [])
-                .filter(obj => {
+                .filter((obj: any) => {
                     const key = obj.Key || '';
                     return key !== `productos/${folderName}/` && // Excluir la carpeta misma
                            /\.(jpg|jpeg|png|webp)$/i.test(key); // Solo archivos de imagen
                 })
-                .map(async (obj) => {
+                .map(async (obj: any) => {
                     const key = obj.Key!;
                     const fileName = key.split('/').pop() || '';
                     
