@@ -323,7 +323,7 @@ export const deleteProductFolder = async (req: Request, res: Response): Promise<
         }
 
         // Eliminar todas las imágenes
-        const deletePromises = listResponse.Contents.map(obj => {
+        const deletePromises = listResponse.Contents.map((obj:any) => {
             const deleteCommand = new DeleteObjectCommand({
                 Bucket: BUCKET_NAME,
                 Key: obj.Key!
