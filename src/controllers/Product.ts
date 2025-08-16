@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import { ProductRepository } from '../repositories/Product';
 import { IProductRequest } from '../interfaces/Product';
-import multer, { FileFilterCallback } from 'multer';
+import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
-import { S3Client, PutObjectCommand, ListObjectsV2Command, HeadObjectCommand, DeleteObjectCommand, CommonPrefix, _Object } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, ListObjectsV2Command, HeadObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const s3Client = new S3Client({
@@ -15,10 +15,7 @@ const s3Client = new S3Client({
 });
 
 const productRepository = new ProductRepository()
-// Extender el tipo Request para incluir files
-interface MulterRequest extends Request {
-    files?: Express.Multer.File[];
-}
+
 const BUCKET_NAME = process.env.S3_BUCKET_NAME || 'tricks-bucket';
 // Obtener todas las carpetas de productos
 // Configuración de multer para manejar archivos en memoria
@@ -27,7 +24,7 @@ const upload = multer({
     limits: {
         fileSize: 5 * 1024 * 1024, // 5MB límite
     },
-    fileFilter: (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
+    fileFilter: (req, file, cb) => {
         const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
         if (allowedMimes.includes(file.mimetype)) {
             cb(null, true);
@@ -51,7 +48,7 @@ export const getAllProductFolders = async (req: Request, res: Response): Promise
 
         const response = await s3Client.send(command);
 
-        const folders = response.CommonPrefixes?.map((prefix: CommonPrefix) => {
+        const folders = response.CommonPrefixes?.map(prefix => {
             const folderPath = prefix.Prefix?.replace('productos/', '').replace('/', '');
             return {
                 folderName: folderPath,
@@ -90,12 +87,12 @@ export const getProductImages = async (req: Request, res: Response): Promise<voi
 
         const images = await Promise.all(
             (response.Contents || [])
-                .filter((obj: _Object) => {
+                .filter((obj: any) => {
                     const key = obj.Key || '';
                     return key !== `productos/${folderName}/` && // Excluir la carpeta misma
                            /\.(jpg|jpeg|png|webp)$/i.test(key); // Solo archivos de imagen
                 })
-                .map(async (obj: _Object) => {
+                .map(async (obj: any) => {
                     const key = obj.Key!;
                     const fileName = key.split('/').pop() || '';
                     
@@ -130,7 +127,7 @@ export const getProductImages = async (req: Request, res: Response): Promise<voi
 };
 
 // 3. Crear una nueva carpeta de producto y subir imágenes
-export const createProductFolder = async (req: MulterRequest, res: Response): Promise<void> => {
+export const createProductFolder = async (req: Request, res: Response): Promise<void> => {
     try {
         const { productName } = req.body;
         const files = req.files as Express.Multer.File[];
@@ -156,7 +153,7 @@ export const createProductFolder = async (req: MulterRequest, res: Response): Pr
             return;
         }
 
-        const uploadPromises = files.map(async (file: Express.Multer.File, index: number) => {
+        const uploadPromises = files.map(async (file, index) => {
             const fileExtension = file.originalname.split('.').pop() || 'jpg';
             const fileName = `${uuidv4()}-${index}.${fileExtension}`;
             const key = `${folderPath}/${fileName}`;
@@ -200,7 +197,7 @@ export const createProductFolder = async (req: MulterRequest, res: Response): Pr
 };
 
 // 4. Agregar más imágenes a una carpeta existente
-export const addImagesToFolder = async (req: MulterRequest, res: Response): Promise<void> => {
+export const addImagesToFolder = async (req: Request, res: Response): Promise<void> => {
     try {
         const { folderName } = req.params;
         const files = req.files as Express.Multer.File[];
@@ -224,7 +221,7 @@ export const addImagesToFolder = async (req: MulterRequest, res: Response): Prom
             return;
         }
 
-        const uploadPromises = files.map(async (file: Express.Multer.File, index: number) => {
+        const uploadPromises = files.map(async (file, index) => {
             const fileExtension = file.originalname.split('.').pop() || 'jpg';
             const fileName = `${uuidv4()}-${Date.now()}-${index}.${fileExtension}`;
             const key = `${folderPath}/${fileName}`;
@@ -326,7 +323,7 @@ export const deleteProductFolder = async (req: Request, res: Response): Promise<
         }
 
         // Eliminar todas las imágenes
-        const deletePromises = listResponse.Contents.map((obj: any) => {
+        const deletePromises = listResponse.Contents.map((obj:any) => {
             const deleteCommand = new DeleteObjectCommand({
                 Bucket: BUCKET_NAME,
                 Key: obj.Key!
