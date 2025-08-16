@@ -30,14 +30,14 @@ router.get('/folders/:folderName/images', getProductImages);
 router.post('/folders/create', 
     authenticateAdminToken, 
     uploadMiddleware, 
-    createProductFolder
+    (req, res) => createProductFolder(req as any, res)
 );
 
 // Agregar más imágenes a una carpeta existente (requiere autenticación de admin)
 router.post('/folders/:folderName/images', 
     authenticateAdminToken, 
     uploadMiddleware, 
-    addImagesToFolder
+    (req, res) =>addImagesToFolder(req as any, res)
 );
 
 // Eliminar una imagen específica (requiere autenticación de admin)
