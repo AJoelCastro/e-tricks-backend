@@ -129,10 +129,9 @@ export const getProductImages = async (req: Request, res: Response): Promise<voi
 // 3. Crear una nueva carpeta de producto y subir imágenes
 export const createProductFolder = async (req: any, res: Response): Promise<void> => {
     try {
-        const { productName } = req.body;
+        const { folderName } = req.body;
         const files = req.files as any[];
-
-        if (!productName) {
+        if (!folderName) {
             res.status(400).json({ message: 'El nombre del producto es requerido' });
             return;
         }
@@ -143,7 +142,7 @@ export const createProductFolder = async (req: any, res: Response): Promise<void
         }
 
         // Limpiar el nombre del producto para usarlo como nombre de carpeta
-        const cleanProductName = productName.trim().replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ');
+        const cleanProductName = folderName.trim().replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ');
         const folderPath = `productos/${cleanProductName}`;
 
         // Verificar si la carpeta ya existe
