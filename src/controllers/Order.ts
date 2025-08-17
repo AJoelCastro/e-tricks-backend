@@ -7,6 +7,7 @@ import { IOrderMetadata, IPaymentData } from '../interfaces/Order';
 import { UserRepository } from "../repositories/User";
 import { ProductModel } from '../models/Product';
 import { MessageRepository } from '../repositories/Message';
+import PDFDocument from 'pdfkit';
 const messageRepo = new MessageRepository();
 const userRepository = new UserRepository();
 const orderRepository = new OrderRepository();
@@ -57,7 +58,71 @@ const generateOrderNumber = async (): Promise<string> => {
 
     throw new Error('No se pudo generar un número de orden único');
 };
+export const exportOrdersPDF = async (req: Request, res: Response) => {
+  try {
+    const { startDate, endDate } = req.query;
 
+    if (!startDate || !endDate) {
+       res.status(400).json({ error: 'Debe proporcionar startDate y endDate' });
+       return;
+    }
+    // Convertir a fechas válidas
+    const start = new Date(startDate as string);
+    const end = new Date(endDate as string);
+
+    // Buscar órdenes dentro del rango
+    const orders = await OrderModel.find({
+      createdAt: { $gte: start, $lte: end }
+    })
+      //.populate('user', 'name email')
+      .populate('items.productId', 'name price');
+
+    // Crear PDF
+    const doc = new PDFDocument({ margin: 30, size: 'A4' });
+
+    // Cabecera HTTP para descarga
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="ordenes_${startDate}_${endDate}.pdf"`);
+
+    doc.pipe(res);
+
+    // Título
+    doc.fontSize(18).text('Reporte de Órdenes', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(12).text(`Desde: ${start.toLocaleDateString()} - Hasta: ${end.toLocaleDateString()}`);
+    doc.moveDown();
+
+    if (orders.length === 0) {
+      doc.text('No se encontraron órdenes en este rango de fechas.');
+    } else {
+      orders.forEach((order, index) => {
+        doc.fontSize(12).text(`Orden #${order.orderNumber}`, { underline: true });
+        doc.text(`User ID: ${order.userId}`);
+        // doc.text(`Usuario: ${order.user?.name} (${order.user?.email})`);
+        doc.text(`Estado: ${order.status}`);
+        doc.text(`Fecha: ${new Date(order.createdAt).toLocaleString()}`);
+        doc.text(`Total: S/. ${order.totalAmount}`);
+        doc.moveDown();
+
+        // Items
+        order.items.forEach((item: any) => {
+          doc.text(`- ${item.name} (${item.quantity} x S/.${item.price})`);
+        });
+
+        if (index !== orders.length - 1) {
+          doc.moveDown().moveDown();
+          doc.text('--------------------------------------------');
+          doc.moveDown();
+        }
+      });
+    }
+
+    doc.end();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al generar el PDF' });
+  }
+};
 export const createPreference = async (req: Request, res: Response): Promise<void> => {
     try {
         const { userId, couponCode, addressId, orderType } = req.body;

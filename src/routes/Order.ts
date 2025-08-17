@@ -10,7 +10,8 @@ import {
     requestItemRefund, 
     getRefundableItems ,
     getOrderByNumber,
-    getAllOrderDetails
+    getAllOrderDetails,
+    exportOrdersPDF
 
 } from "../controllers/Order";
 const authenticateClerkToken = require('../middleware/auth');
@@ -20,7 +21,8 @@ const router = express.Router();
 router.get('/getAll', authenticateAdminToken, getAllOrderDetails);
 // Obtener detalles de una orden con el número de orden
 router.get('/:oNumber/onumber', authenticateClerkToken, getOrderByNumber);
-
+// funcion para obtener un pdf con las ordenes
+router.get('/export-pdf', authenticateAdminToken, exportOrdersPDF);
 // Obtener detalles de una orden específica
 router.get('/:orderId', authenticateClerkToken, getOrderDetails);
 
