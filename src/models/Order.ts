@@ -78,7 +78,7 @@ const OrderSchema = new Schema<IOrder>({
     },
     address: {
         type: AddressSchema,
-        required: true
+        required: false
     },
     status: {
         type: String,
