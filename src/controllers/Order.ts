@@ -8,6 +8,7 @@ import { UserRepository } from "../repositories/User";
 import { ProductModel } from '../models/Product';
 import { MessageRepository } from '../repositories/Message';
 import PDFDocument from 'pdfkit';
+import { sendOrderEmail } from '../utils/MailerSend';
 const messageRepo = new MessageRepository();
 const userRepository = new UserRepository();
 const orderRepository = new OrderRepository();
@@ -306,7 +307,8 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
                   message: `USER' ${user},userId ${userId}`
                   }); */
 
-                await createOrder(paymentData, metadata);            
+                await createOrder(paymentData, metadata);
+                await sendOrderEmail("misthorn33@gmail.com", "1231313");
             }
         }
 

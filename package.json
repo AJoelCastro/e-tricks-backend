@@ -18,6 +18,7 @@
     "express": "^4.21.2",
     "http-errors": "~1.6.3",
     "jade": "^0.29.0",
+    "mailersend": "^2.6.0",
     "mercadopago": "^2.8.0",
     "mongodb": "^6.16.0",
     "mongoose": "^8.15.1",
